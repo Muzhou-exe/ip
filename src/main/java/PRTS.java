@@ -26,6 +26,8 @@ public class PRTS {
                                               \\|___|                                        \\/____/
 """;
 
+    private static final int MAX_TASKS = 100;
+
     // ===================== Task classes =====================
 
     private static class Task {
@@ -107,7 +109,7 @@ public class PRTS {
         System.out.println("What can I do for you?");
 
         Scanner scanner = new Scanner(System.in);
-        Task[] tasks = new Task[100];
+        Task[] tasks = new Task[MAX_TASKS];
         int taskCount = 0;
 
         while (true) {
@@ -126,61 +128,94 @@ public class PRTS {
             if (input.equals("list")) {
                 System.out.println("Here are the tasks in your list:");
                 for (int i = 0; i < taskCount; i++) {
+                    // Week3 examples often show "1.[T][ ] ..." (no extra space after dot)
                     System.out.println((i + 1) + "." + tasks[i]);
                 }
                 continue;
             }
 
             // ---------------- todo ----------------
-            if (input.startsWith("todo")) {
-                if (!input.startsWith("todo ")) {
-                    System.out.println("Invalid todo format. Usage: todo <description>");
+            if (input.equals("todo")) {
+                System.out.println("OOPS!!! The description of a todo cannot be empty.");
+                continue;
+            }
+            if (input.startsWith("todo ")) {
+                if (taskCount >= tasks.length) {
+                    System.out.println("OOPS!!! Your task list is full (max " + MAX_TASKS + " tasks).");
                     continue;
                 }
 
                 String desc = input.substring(5).trim();
                 if (desc.isEmpty()) {
-                    System.out.println("Invalid todo format. Usage: todo <description>");
+                    System.out.println("OOPS!!! The description of a todo cannot be empty.");
                     continue;
                 }
 
-                tasks[taskCount++] = new Todo(desc);
-                System.out.println("added: " + desc);
+                Task t = new Todo(desc);
+                tasks[taskCount++] = t;
+                printAddedTask(t, taskCount);
                 continue;
             }
 
             // ---------------- deadline ----------------
-            if (input.startsWith("deadline")) {
+            if (input.equals("deadline")) {
+                System.out.println("OOPS!!! The description of a deadline cannot be empty.");
+                continue;
+            }
+            if (input.startsWith("deadline ")) {
+                if (taskCount >= tasks.length) {
+                    System.out.println("OOPS!!! Your task list is full (max " + MAX_TASKS + " tasks).");
+                    continue;
+                }
+
                 if (!input.contains(" /by ")) {
-                    System.out.println("Invalid deadline format. Usage: deadline <description> /by <by>");
+                    System.out.println("OOPS!!! The format for deadline is: deadline <description> /by <by>");
                     continue;
                 }
 
-                String rest = input.substring(9).trim();
+                String rest = input.substring(9).trim(); // after "deadline"
                 String[] parts = rest.split(" /by ", 2);
-                if (parts.length < 2 || parts[0].isBlank() || parts[1].isBlank()) {
-                    System.out.println("Invalid deadline format. Usage: deadline <description> /by <by>");
+
+                String desc = parts.length > 0 ? parts[0].trim() : "";
+                String by = parts.length > 1 ? parts[1].trim() : "";
+
+                if (desc.isEmpty()) {
+                    System.out.println("OOPS!!! The description of a deadline cannot be empty.");
+                    continue;
+                }
+                if (by.isEmpty()) {
+                    System.out.println("OOPS!!! The /by part of a deadline cannot be empty.");
                     continue;
                 }
 
-                tasks[taskCount++] = new Deadline(parts[0].trim(), parts[1].trim());
-                System.out.println("added: " + parts[0].trim());
+                Task t = new Deadline(desc, by);
+                tasks[taskCount++] = t;
+                printAddedTask(t, taskCount);
                 continue;
             }
 
             // ---------------- event ----------------
-            if (input.startsWith("event")) {
-                if (!input.contains(" /from ") || !input.contains(" /to ")) {
-                    System.out.println("Invalid event format. Usage: event <description> /from <from> /to <to>");
+            if (input.equals("event")) {
+                System.out.println("OOPS!!! The description of an event cannot be empty.");
+                continue;
+            }
+            if (input.startsWith("event ")) {
+                if (taskCount >= tasks.length) {
+                    System.out.println("OOPS!!! Your task list is full (max " + MAX_TASKS + " tasks).");
                     continue;
                 }
 
-                String rest = input.substring(6).trim();
+                if (!input.contains(" /from ") || !input.contains(" /to ")) {
+                    System.out.println("OOPS!!! The format for event is: event <description> /from <from> /to <to>");
+                    continue;
+                }
+
+                String rest = input.substring(5).trim(); // after "event"
                 int fromPos = rest.indexOf(" /from ");
                 int toPos = rest.indexOf(" /to ");
 
-                if (fromPos < 0 || toPos < fromPos) {
-                    System.out.println("Invalid event format. Usage: event <description> /from <from> /to <to>");
+                if (fromPos < 0 || toPos < 0 || toPos < fromPos) {
+                    System.out.println("OOPS!!! The format for event is: event <description> /from <from> /to <to>");
                     continue;
                 }
 
@@ -188,21 +223,38 @@ public class PRTS {
                 String from = rest.substring(fromPos + 7, toPos).trim();
                 String to = rest.substring(toPos + 5).trim();
 
-                if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
-                    System.out.println("Invalid event format. Usage: event <description> /from <from> /to <to>");
+                if (desc.isEmpty()) {
+                    System.out.println("OOPS!!! The description of an event cannot be empty.");
+                    continue;
+                }
+                if (from.isEmpty()) {
+                    System.out.println("OOPS!!! The /from part of an event cannot be empty.");
+                    continue;
+                }
+                if (to.isEmpty()) {
+                    System.out.println("OOPS!!! The /to part of an event cannot be empty.");
                     continue;
                 }
 
-                tasks[taskCount++] = new Event(desc, from, to);
-                System.out.println("added: " + desc);
+                Task t = new Event(desc, from, to);
+                tasks[taskCount++] = t;
+                printAddedTask(t, taskCount);
                 continue;
             }
 
             // ---------------- mark / unmark ----------------
+            if (input.equals("mark")) {
+                System.out.println("OOPS!!! Please provide a task number. Usage: mark <index>");
+                continue;
+            }
             if (input.startsWith("mark ")) {
                 Integer index = parseIndex(input.substring(5));
-                if (index == null || index < 1 || index > taskCount) {
-                    System.out.println("Invalid task number.");
+                if (index == null) {
+                    System.out.println("OOPS!!! Please provide a valid task number.");
+                    continue;
+                }
+                if (index < 1 || index > taskCount) {
+                    System.out.println("OOPS!!! That task number is out of range.");
                     continue;
                 }
 
@@ -212,10 +264,18 @@ public class PRTS {
                 continue;
             }
 
+            if (input.equals("unmark")) {
+                System.out.println("OOPS!!! Please provide a task number. Usage: unmark <index>");
+                continue;
+            }
             if (input.startsWith("unmark ")) {
                 Integer index = parseIndex(input.substring(7));
-                if (index == null || index < 1 || index > taskCount) {
-                    System.out.println("Invalid task number.");
+                if (index == null) {
+                    System.out.println("OOPS!!! Please provide a valid task number.");
+                    continue;
+                }
+                if (index < 1 || index > taskCount) {
+                    System.out.println("OOPS!!! That task number is out of range.");
                     continue;
                 }
 
@@ -226,8 +286,14 @@ public class PRTS {
             }
 
             // ---------------- unknown command ----------------
-            System.out.println("I don't understand that command.");
+            System.out.println("OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
+    }
+
+    private static void printAddedTask(Task task, int taskCount) {
+        System.out.println("Got it. I've added this task:");
+        System.out.println(task);
+        System.out.println("Now you have " + taskCount + " tasks in the list.");
     }
 
     private static Integer parseIndex(String s) {
