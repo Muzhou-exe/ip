@@ -26,7 +26,7 @@ public class PRTS {
                                               \\|___|                                        \\/____/
 """;
 
-    // ---------- Level-4: Task types ----------
+    // ===================== Task classes =====================
 
     private static class Task {
         protected final String description;
@@ -34,7 +34,6 @@ public class PRTS {
 
         Task(String description) {
             this.description = description;
-            this.isDone = false;
         }
 
         boolean isDone() {
@@ -55,7 +54,6 @@ public class PRTS {
 
         @Override
         public String toString() {
-            // Base format: [ ] description
             return statusIcon() + " " + description;
         }
     }
@@ -101,7 +99,7 @@ public class PRTS {
         }
     }
 
-    // ---------- Main program ----------
+    // ===================== Main =====================
 
     public static void main(String[] args) {
         System.out.print(LOGO);
@@ -109,21 +107,20 @@ public class PRTS {
         System.out.println("What can I do for you?");
 
         Scanner scanner = new Scanner(System.in);
-
         Task[] tasks = new Task[100];
         int taskCount = 0;
 
         while (true) {
             String input = scanner.nextLine().trim();
 
+            // Level-5: empty input → ignore silently
+            if (input.isEmpty()) {
+                continue;
+            }
+
             if (input.equals("bye")) {
                 System.out.println("Bye. Hope to see you again soon!");
                 break;
-            }
-
-            if (input.isEmpty()) {
-                System.out.println("(empty input ignored)");
-                continue;
             }
 
             if (input.equals("list")) {
@@ -134,10 +131,10 @@ public class PRTS {
                 continue;
             }
 
-            // ---------- Level-4 commands ----------
-            if (input.startsWith("todo ")) {
-                if (taskCount >= tasks.length) {
-                    System.out.println("Task list is full (max " + tasks.length + ").");
+            // ---------------- todo ----------------
+            if (input.startsWith("todo")) {
+                if (!input.startsWith("todo ")) {
+                    System.out.println("Invalid todo format. Usage: todo <description>");
                     continue;
                 }
 
@@ -152,30 +149,29 @@ public class PRTS {
                 continue;
             }
 
-            if (input.startsWith("deadline ")) {
-                if (taskCount >= tasks.length) {
-                    System.out.println("Task list is full (max " + tasks.length + ").");
+            // ---------------- deadline ----------------
+            if (input.startsWith("deadline")) {
+                if (!input.contains(" /by ")) {
+                    System.out.println("Invalid deadline format. Usage: deadline <description> /by <by>");
                     continue;
                 }
 
                 String rest = input.substring(9).trim();
                 String[] parts = rest.split(" /by ", 2);
-                if (parts.length < 2 || parts[0].trim().isEmpty() || parts[1].trim().isEmpty()) {
+                if (parts.length < 2 || parts[0].isBlank() || parts[1].isBlank()) {
                     System.out.println("Invalid deadline format. Usage: deadline <description> /by <by>");
                     continue;
                 }
 
-                String desc = parts[0].trim();
-                String by = parts[1].trim();
-
-                tasks[taskCount++] = new Deadline(desc, by);
-                System.out.println("added: " + desc);
+                tasks[taskCount++] = new Deadline(parts[0].trim(), parts[1].trim());
+                System.out.println("added: " + parts[0].trim());
                 continue;
             }
 
-            if (input.startsWith("event ")) {
-                if (taskCount >= tasks.length) {
-                    System.out.println("Task list is full (max " + tasks.length + ").");
+            // ---------------- event ----------------
+            if (input.startsWith("event")) {
+                if (!input.contains(" /from ") || !input.contains(" /to ")) {
+                    System.out.println("Invalid event format. Usage: event <description> /from <from> /to <to>");
                     continue;
                 }
 
@@ -183,14 +179,14 @@ public class PRTS {
                 int fromPos = rest.indexOf(" /from ");
                 int toPos = rest.indexOf(" /to ");
 
-                if (fromPos == -1 || toPos == -1 || toPos < fromPos) {
+                if (fromPos < 0 || toPos < fromPos) {
                     System.out.println("Invalid event format. Usage: event <description> /from <from> /to <to>");
                     continue;
                 }
 
                 String desc = rest.substring(0, fromPos).trim();
-                String from = rest.substring(fromPos + 7, toPos).trim(); // 7 = " /from ".length()
-                String to = rest.substring(toPos + 5).trim();           // 5 = " /to ".length()
+                String from = rest.substring(fromPos + 7, toPos).trim();
+                String to = rest.substring(toPos + 5).trim();
 
                 if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
                     System.out.println("Invalid event format. Usage: event <description> /from <from> /to <to>");
@@ -202,56 +198,41 @@ public class PRTS {
                 continue;
             }
 
-            // ---------- Existing Level-3 commands ----------
+            // ---------------- mark / unmark ----------------
             if (input.startsWith("mark ")) {
-                Integer index = parseIndex(input.substring(5).trim());
+                Integer index = parseIndex(input.substring(5));
                 if (index == null || index < 1 || index > taskCount) {
-                    System.out.println("Invalid task number for mark.");
+                    System.out.println("Invalid task number.");
                     continue;
                 }
 
-                Task task = tasks[index - 1];
-                if (!task.isDone()) {
-                    task.markDone();
-                }
-
+                tasks[index - 1].markDone();
                 System.out.println("Nice! I've marked this task as done:");
-                System.out.println(task);
+                System.out.println(tasks[index - 1]);
                 continue;
             }
 
             if (input.startsWith("unmark ")) {
-                Integer index = parseIndex(input.substring(7).trim());
+                Integer index = parseIndex(input.substring(7));
                 if (index == null || index < 1 || index > taskCount) {
-                    System.out.println("Invalid task number for unmark.");
+                    System.out.println("Invalid task number.");
                     continue;
                 }
 
-                Task task = tasks[index - 1];
-                if (task.isDone()) {
-                    task.unmarkDone();
-                }
-
+                tasks[index - 1].unmarkDone();
                 System.out.println("OK, I've marked this task as not done yet:");
-                System.out.println(task);
+                System.out.println(tasks[index - 1]);
                 continue;
             }
 
-            // ---------- Default behavior ----------
-            // Keep old behavior: any other input becomes a generic Task
-            if (taskCount >= tasks.length) {
-                System.out.println("Task list is full (max " + tasks.length + ").");
-                continue;
-            }
-
-            tasks[taskCount++] = new Task(input);
-            System.out.println("added: " + input);
+            // ---------------- unknown command ----------------
+            System.out.println("I don't understand that command.");
         }
     }
 
     private static Integer parseIndex(String s) {
         try {
-            return Integer.parseInt(s);
+            return Integer.parseInt(s.trim());
         } catch (NumberFormatException e) {
             return null;
         }
