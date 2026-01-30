@@ -38,10 +38,6 @@ public class PRTS {
             this.description = description;
         }
 
-        boolean isDone() {
-            return isDone;
-        }
-
         void markDone() {
             isDone = true;
         }
@@ -128,9 +124,37 @@ public class PRTS {
             if (input.equals("list")) {
                 System.out.println("Here are the tasks in your list:");
                 for (int i = 0; i < taskCount; i++) {
-                    // Week3 examples often show "1.[T][ ] ..." (no extra space after dot)
                     System.out.println((i + 1) + "." + tasks[i]);
                 }
+                continue;
+            }
+
+            // ===================== Level-6: delete =====================
+            if (input.equals("delete")) {
+                System.out.println("OOPS!!! Please provide a task number. Usage: delete <index>");
+                continue;
+            }
+            if (input.startsWith("delete ")) {
+                Integer index = parseIndex(input.substring(7));
+                if (index == null) {
+                    System.out.println("OOPS!!! Please provide a valid task number.");
+                    continue;
+                }
+                if (index < 1 || index > taskCount) {
+                    System.out.println("OOPS!!! That task number is out of range.");
+                    continue;
+                }
+
+                Task removed = tasks[index - 1];
+
+                // shift left to fill the gap
+                for (int i = index; i < taskCount; i++) {
+                    tasks[i - 1] = tasks[i];
+                }
+                tasks[taskCount - 1] = null;
+                taskCount--;
+
+                printDeletedTask(removed, taskCount);
                 continue;
             }
 
@@ -173,7 +197,7 @@ public class PRTS {
                     continue;
                 }
 
-                String rest = input.substring(9).trim(); // after "deadline"
+                String rest = input.substring(8).trim(); // after "deadline"
                 String[] parts = rest.split(" /by ", 2);
 
                 String desc = parts.length > 0 ? parts[0].trim() : "";
@@ -292,6 +316,12 @@ public class PRTS {
 
     private static void printAddedTask(Task task, int taskCount) {
         System.out.println("Got it. I've added this task:");
+        System.out.println(task);
+        System.out.println("Now you have " + taskCount + " tasks in the list.");
+    }
+
+    private static void printDeletedTask(Task task, int taskCount) {
+        System.out.println("Noted. I've removed this task:");
         System.out.println(task);
         System.out.println("Now you have " + taskCount + " tasks in the list.");
     }
