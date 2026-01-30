@@ -1,3 +1,5 @@
+import java.util.Scanner;
+
 public class PRTS {
 
     private static final String LOGO = """
@@ -33,6 +35,19 @@ public class PRTS {
         System.out.print(LOGO);
         System.out.println("Hello! I'm PRTS");
         System.out.println("What can I do for you?");
-        System.out.println("Bye. Hope to see you again soon!");
+
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            String input = scanner.nextLine();
+
+            if (input.equals("bye")) {
+                System.out.println("Bye. Hope to see you again soon!");
+                break;
+            }
+
+            System.out.println(input);
+        }
     }
+
 }
