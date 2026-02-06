@@ -1,3 +1,10 @@
+/**
+ * Entry point of the PRTS chatbot application.
+ * <p>
+ * This class initializes the core components and runs the main program loop.
+ * </p>
+ */
+
 package prts;
 import java.util.Scanner;
 import prts.task.Task;
@@ -32,6 +39,11 @@ public class PRTS {
 """;
 
     private static final int MAX_TASKS = 100;
+    /**
+     * Starts the chatbot application.
+     *
+     * @param args Command-line arguments (not used).
+     */
 
     public static void main(String[] args) {
         Ui ui = new Ui();

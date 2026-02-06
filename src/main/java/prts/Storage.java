@@ -1,3 +1,10 @@
+/**
+ * Handles loading and saving task data to disk.
+ * <p>
+ * This class manages file I/O operations for persistent storage.
+ * </p>
+ */
+
 package prts;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -20,6 +27,12 @@ public class Storage {
     public Storage(String filePath) {
         this.filePath = filePath;
     }
+    /**
+     * Loads tasks from the data file.
+     *
+     * @return A list of tasks loaded from disk.
+     * @throws IOException If reading from the file fails.
+     */
 
     public List<Task> load() {
         try {
@@ -42,6 +55,12 @@ public class Storage {
             return new ArrayList<>();
         }
     }
+    /**
+     * Saves the given list of tasks to disk.
+     *
+     * @param tasks The list of tasks to be saved.
+     * @throws IOException If writing to the file fails.
+     */
 
     public void save(TaskList tasks) {
         try {
