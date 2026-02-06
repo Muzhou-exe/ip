@@ -1,3 +1,12 @@
+/**
+ * Represents a parsed user command.
+ * <p>
+ * A ParsedCommand contains the command type and any associated arguments
+ * extracted from the user's raw input.
+ * </p>
+ */
+
+
 package prts;
 import prts.task.Task;
 import prts.task.Todo;

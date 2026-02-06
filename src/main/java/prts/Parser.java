@@ -1,3 +1,11 @@
+/**
+ * Parses raw user input into executable commands.
+ * <p>
+ * This class is responsible for validating user input and converting it
+ * into {@link ParsedCommand} objects.
+ * </p>
+ */
+
 package prts;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -7,6 +15,12 @@ import prts.task.Deadline;
 import prts.task.Event;
 
 public class Parser {
+    /**
+     * Parses the user's input string into a {@link ParsedCommand}.
+     *
+     * @param fullCommand Raw input entered by the user.
+     * @return A ParsedCommand representing the user's intent, or an error command if invalid.
+     */
 
     public static ParsedCommand parse(String input) {
 

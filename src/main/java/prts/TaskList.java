@@ -1,3 +1,11 @@
+/**
+ * Represents a list of tasks managed by the chatbot.
+ * <p>
+ * Task numbers used by this class are 1-based, meaning task number 1 refers
+ * to the first task shown to the user.
+ * </p>
+ */
+
 package prts;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +28,14 @@ public class TaskList {
     }
 
     // 1-based access for printing
+    /**
+     * Returns the task at the given 1-based task number.
+     *
+     * @param taskNumber Task number shown to the user (1-based).
+     * @return The task at the specified task number.
+     * @throws IllegalArgumentException If the task number is out of range.
+     */
+
     public Task get(int oneBasedIndex) {
         int i = oneBasedIndex - 1;
         if (i < 0 || i >= tasks.size()) {
@@ -27,6 +43,11 @@ public class TaskList {
         }
         return tasks.get(i);
     }
+    /**
+     * Adds a task to the task list.
+     *
+     * @param task The task to be added.
+     */
 
     public void add(Task t) {
         if (tasks.size() >= maxSize) {
@@ -34,6 +55,13 @@ public class TaskList {
         }
         tasks.add(t);
     }
+    /**
+     * Deletes and returns the task at the given 1-based task number.
+     *
+     * @param taskNumber Task number shown to the user (1-based).
+     * @return The removed task.
+     * @throws IllegalArgumentException If the task number is out of range.
+     */
 
     public Task delete(int oneBasedIndex) {
         int i = oneBasedIndex - 1;
