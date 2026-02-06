@@ -1,3 +1,5 @@
+
+package prts;
 /**
  * Parses raw user input into executable commands.
  * <p>
@@ -5,8 +7,6 @@
  * into {@link ParsedCommand} objects.
  * </p>
  */
-
-package prts;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;

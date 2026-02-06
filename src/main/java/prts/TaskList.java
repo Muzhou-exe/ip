@@ -1,3 +1,6 @@
+
+
+package prts;
 /**
  * Represents a list of tasks managed by the chatbot.
  * <p>
@@ -5,9 +8,6 @@
  * to the first task shown to the user.
  * </p>
  */
-
-package prts;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,7 +33,7 @@ public class TaskList {
     /**
      * Returns the task at the given 1-based task number.
      *
-
+     * @param oneBasedIndex Task number shown to the user (1-based).
      * @return The task at the specified task number.
      * @throws IllegalArgumentException If the task number is out of range.
      */

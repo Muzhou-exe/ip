@@ -1,3 +1,5 @@
+
+package prts;
 /**
  * Represents a parsed user command.
  * <p>
@@ -6,8 +8,6 @@
  * </p>
  */
 
-
-package prts;
 
 import prts.task.Task;
 import prts.task.Todo;
