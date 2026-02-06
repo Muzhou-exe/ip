@@ -30,8 +30,22 @@ public class Parser {
         if (input.equals("bye")) {
             return ParsedCommand.bye();
         }
+        if (input.equals("cheer")) {
+            return ParsedCommand.cheer();
+        }
         if (input.equals("list")) {
             return ParsedCommand.list();
+        }
+        // find (Level-9)
+        if (input.equals("find")) {
+            return ParsedCommand.error("OOPS!!! Usage: find <keyword>");
+        }
+        if (input.startsWith("find ")) {
+            String keyword = input.substring(5).trim();
+            if (keyword.isEmpty()) {
+                return ParsedCommand.error("OOPS!!! Usage: find <keyword>");
+            }
+            return ParsedCommand.find(keyword);
         }
 
         // delete
