@@ -1,4 +1,9 @@
+package prts;
 import java.util.Scanner;
+import prts.task.Task;
+import prts.task.Todo;
+import prts.task.Deadline;
+import prts.task.Event;
 
 public class PRTS {
 
