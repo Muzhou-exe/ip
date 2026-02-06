@@ -1,5 +1,7 @@
 package prts;
+
 import java.util.Scanner;
+
 import prts.task.Task;
 import prts.task.Todo;
 import prts.task.Deadline;
@@ -8,28 +10,28 @@ import prts.task.Event;
 public class PRTS {
 
     private static final String LOGO = """
-                      _____                    _____                _____                    _____
-                     /\\    \\                  /\\    \\              /\\    \\                  /\\    \\
-                    /::\\    \\                /::\\    \\            /::\\    \\                /::\\    \\
-                   /::::\\    \\              /::::\\    \\           \\:::\\    \\              /::::\\    \\
-                  /::::::\\    \\            /::::::\\    \\           \\:::\\    \\            /::::::\\    \\
-                 /:::/\\:::\\    \\          /:::/\\:::\\    \\           \\:::\\    \\          /:::/\\:::\\    \\
-                /:::/__\\:::\\    \\        /:::/__\\:::\\    \\           \\:::\\    \\        /:::/__\\:::\\    \\
-               /::::\\   \\:::\\    \\      /::::\\   \\:::\\    \\          /::::\\    \\       \\:::\\   \\:::\\    \\
-              /::::::\\   \\:::\\    \\    /::::::\\   \\:::\\    \\        /::::::\\    \\    ___\\:::\\   \\:::\\    \\
-             /:::/\\:::\\   \\:::\\____\\  /:::/\\:::\\   \\:::\\____\\      /:::/\\:::\\    \\  /\\   \\:::\\   \\:::\\    \\
-            /:::/  \\:::\\   \\:::|    |/:::/  \\:::\\   \\:::|    |    /:::/  \\:::\\____\\/::\\   \\:::\\   \\:::\\____\\
-            \\::/    \\:::\\  /:::|____|\\::/   |::::\\  /:::|____|   /:::/    \\::/    /\\:::\\   \\:::\\   \\::/    /
-             \\/_____/\\:::\\/:::/    /  \\/____|:::::\\/:::/    /   /:::/    / \\/____/  \\:::\\   \\:::\\   \\/____/
-                      \\::::::/    /         |:::::::::/    /   /:::/    /            \\:::\\   \\:::\\    \\
-                       \\::::/    /          |::|\\::::/    /   /:::/    /              \\:::\\   \\:::\\____\\
-                        \\::/____/           |::| \\::/____/    \\::/    /                \\:::\\  /:::/    /
-                         ~~                 |::|  ~|           \\/____/                  \\:::\\/:::/    /
-                                            |::|   |                                     \\::::::/    /
-                                            \\::|   |                                      \\::::/    /
-                                             \\:|   |                                       \\::/    /
-                                              \\|___|                                        \\/____/
-""";
+                                  _____                    _____                _____                    _____
+                                 /\\    \\                  /\\    \\              /\\    \\                  /\\    \\
+                                /::\\    \\                /::\\    \\            /::\\    \\                /::\\    \\
+                               /::::\\    \\              /::::\\    \\           \\:::\\    \\              /::::\\    \\
+                              /::::::\\    \\            /::::::\\    \\           \\:::\\    \\            /::::::\\    \\
+                             /:::/\\:::\\    \\          /:::/\\:::\\    \\           \\:::\\    \\          /:::/\\:::\\    \\
+                            /:::/__\\:::\\    \\        /:::/__\\:::\\    \\           \\:::\\    \\        /:::/__\\:::\\    \\
+                           /::::\\   \\:::\\    \\      /::::\\   \\:::\\    \\          /::::\\    \\       \\:::\\   \\:::\\    \\
+                          /::::::\\   \\:::\\    \\    /::::::\\   \\:::\\    \\        /::::::\\    \\    ___\\:::\\   \\:::\\    \\
+                         /:::/\\:::\\   \\:::\\____\\  /:::/\\:::\\   \\:::\\____\\      /:::/\\:::\\    \\  /\\   \\:::\\   \\:::\\    \\
+                        /:::/  \\:::\\   \\:::|    |/:::/  \\:::\\   \\:::|    |    /:::/  \\:::\\____\\/::\\   \\:::\\   \\:::\\____\\
+                        \\::/    \\:::\\  /:::|____|\\::/   |::::\\  /:::|____|   /:::/    \\::/    /\\:::\\   \\:::\\   \\::/    /
+                         \\/_____/\\:::\\/:::/    /  \\/____|:::::\\/:::/    /   /:::/    / \\/____/  \\:::\\   \\:::\\   \\/____/
+                                  \\::::::/    /         |:::::::::/    /   /:::/    /            \\:::\\   \\:::\\    \\
+                                   \\::::/    /          |::|\\::::/    /   /:::/    /              \\:::\\   \\:::\\____\\
+                                    \\::/____/           |::| \\::/____/    \\::/    /                \\:::\\  /:::/    /
+                                     ~~                 |::|  ~|           \\/____/                  \\:::\\/:::/    /
+                                                        |::|   |                                     \\::::::/    /
+                                                        \\::|   |                                      \\::::/    /
+                                                         \\:|   |                                       \\::/    /
+                                                          \\|___|                                        \\/____/
+            """;
 
     private static final int MAX_TASKS = 100;
 
@@ -72,51 +74,52 @@ public class PRTS {
             }
 
             // Mutations
-            try {switch (cmd.type) {
-                case TODO: {
-                    Task t = new Todo(cmd.description);
-                    taskList.add(t);
-                    ui.showAdded(t, taskList.size());
-                    storage.save(taskList);
-                    break;
+            try {
+                switch (cmd.type) {
+                    case TODO: {
+                        Task t = new Todo(cmd.description);
+                        taskList.add(t);
+                        ui.showAdded(t, taskList.size());
+                        storage.save(taskList);
+                        break;
+                    }
+                    case DEADLINE: {
+                        Task t = new Deadline(cmd.description, cmd.byDate);
+                        taskList.add(t);
+                        ui.showAdded(t, taskList.size());
+                        storage.save(taskList);
+                        break;
+                    }
+                    case EVENT: {
+                        Task t = new Event(cmd.description, cmd.from, cmd.to);
+                        taskList.add(t);
+                        ui.showAdded(t, taskList.size());
+                        storage.save(taskList);
+                        break;
+                    }
+                    case DELETE: {
+                        Task removed = taskList.delete(cmd.index);
+                        ui.showDeleted(removed, taskList.size());
+                        storage.save(taskList);
+                        break;
+                    }
+                    case MARK: {
+                        Task t = taskList.mark(cmd.index);
+                        ui.showMarked(t);
+                        storage.save(taskList);
+                        break;
+                    }
+                    case UNMARK: {
+                        Task t = taskList.unmark(cmd.index);
+                        ui.showUnmarked(t);
+                        storage.save(taskList);
+                        break;
+                    }
+                    default:
+                        // should not reach
+                        ui.showError("OOPS!!! I'm sorry, but I don't know what that means :-(");
+                        break;
                 }
-                case DEADLINE: {
-                    Task t = new Deadline(cmd.description, cmd.byDate);
-                    taskList.add(t);
-                    ui.showAdded(t, taskList.size());
-                    storage.save(taskList);
-                    break;
-                }
-                case EVENT: {
-                    Task t = new Event(cmd.description, cmd.from, cmd.to);
-                    taskList.add(t);
-                    ui.showAdded(t, taskList.size());
-                    storage.save(taskList);
-                    break;
-                }
-                case DELETE: {
-                    Task removed = taskList.delete(cmd.index);
-                    ui.showDeleted(removed, taskList.size());
-                    storage.save(taskList);
-                    break;
-                }
-                case MARK: {
-                    Task t = taskList.mark(cmd.index);
-                    ui.showMarked(t);
-                    storage.save(taskList);
-                    break;
-                }
-                case UNMARK: {
-                    Task t = taskList.unmark(cmd.index);
-                    ui.showUnmarked(t);
-                    storage.save(taskList);
-                    break;
-                }
-                default:
-                    // should not reach
-                    ui.showError("OOPS!!! I'm sorry, but I don't know what that means :-(");
-                    break;
-            }
             } catch (IllegalArgumentException e) {
                 ui.showError(e.getMessage());
             }
