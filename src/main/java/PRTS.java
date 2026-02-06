@@ -3,8 +3,12 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Locale;
 
 public class PRTS {
 
@@ -34,8 +38,12 @@ public class PRTS {
 
     private static final int MAX_TASKS = 100;
 
-    // Level-7 storage file (relative to project root)
+    // Level-7/8 storage file (relative to project root)
     private static final String DATA_FILE_PATH = "data/prts.txt";
+
+    // Level-8: output format (e.g., Oct 15 2019)
+    private static final DateTimeFormatter OUT_DATE_FMT =
+            DateTimeFormatter.ofPattern("MMM dd yyyy", Locale.ENGLISH);
 
     // ===================== Task classes =====================
 
@@ -94,22 +102,42 @@ public class PRTS {
         }
     }
 
+    /**
+     * Level-8: store 'by' as LocalDate (when available).
+     * Also keeps a raw string fallback for backward compatibility (old saves).
+     */
     private static class Deadline extends Task {
-        private final String by;
+        private final LocalDate byDate; // preferred (Level-8)
+        private final String byRaw;     // fallback if date can't be parsed (old data)
 
-        Deadline(String description, String by) {
+        // New constructor: strict date
+        Deadline(String description, LocalDate byDate) {
             super(description);
-            this.by = by;
+            this.byDate = byDate;
+            this.byRaw = null;
+        }
+
+        // Fallback constructor: raw string (for loading old data)
+        Deadline(String description, String byRaw) {
+            super(description);
+            this.byDate = null;
+            this.byRaw = byRaw;
         }
 
         @Override
         String toStorageString() {
-            return "D | " + (isDone() ? 1 : 0) + " | " + description + " | " + by;
+            // Save in ISO yyyy-mm-dd when we have a LocalDate; otherwise save raw
+            String byPart = (byDate != null) ? byDate.toString() : byRaw;
+            return "D | " + (isDone() ? 1 : 0) + " | " + description + " | " + byPart;
         }
 
         @Override
         public String toString() {
-            return "[D]" + super.toString() + " (by: " + by + ")";
+            if (byDate != null) {
+                return "[D]" + super.toString() + " (by: " + byDate.format(OUT_DATE_FMT) + ")";
+            }
+            // fallback printing for old data
+            return "[D]" + super.toString() + " (by: " + byRaw + ")";
         }
     }
 
@@ -221,7 +249,7 @@ public class PRTS {
                 continue;
             }
 
-            // ---------------- deadline ----------------
+            // ---------------- deadline (Level-8) ----------------
             if (input.equals("deadline")) {
                 System.out.println("OOPS!!! The description of a deadline cannot be empty.");
                 continue;
@@ -233,7 +261,7 @@ public class PRTS {
                 }
 
                 if (!input.contains(" /by ")) {
-                    System.out.println("OOPS!!! The format for deadline is: deadline <description> /by <by>");
+                    System.out.println("OOPS!!! The format for deadline is: deadline <description> /by <yyyy-mm-dd>");
                     continue;
                 }
 
@@ -252,7 +280,16 @@ public class PRTS {
                     continue;
                 }
 
-                Task t = new Deadline(desc, by);
+                LocalDate byDate;
+                try {
+                    // Level-8 minimal: accept yyyy-mm-dd
+                    byDate = LocalDate.parse(by);
+                } catch (DateTimeParseException e) {
+                    System.out.println("OOPS!!! Please use date format yyyy-mm-dd, e.g., 2019-10-15");
+                    continue;
+                }
+
+                Task t = new Deadline(desc, byDate);
                 tasks[taskCount++] = t;
                 printAddedTask(t, taskCount);
                 saveTasks(tasks, taskCount);
@@ -380,7 +417,7 @@ public class PRTS {
         }
     }
 
-    // ===================== Level-7 Storage =====================
+    // ===================== Level-7/8 Storage =====================
 
     private static void ensureDataFileExists() throws IOException {
         Path file = Paths.get(DATA_FILE_PATH);
@@ -458,7 +495,14 @@ public class PRTS {
                 if (parts.length < 4) {
                     return null;
                 }
-                t = new Deadline(desc, parts[3].trim());
+                String byPart = parts[3].trim();
+                // Level-8: try parse as yyyy-mm-dd; if fails, keep raw (backward compatible)
+                try {
+                    LocalDate d = LocalDate.parse(byPart);
+                    t = new Deadline(desc, d);
+                } catch (DateTimeParseException e) {
+                    t = new Deadline(desc, byPart);
+                }
                 break;
             case "E":
                 if (parts.length < 5) {
