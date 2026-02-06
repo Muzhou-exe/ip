@@ -17,12 +17,7 @@ import prts.task.Deadline;
 import prts.task.Event;
 
 public class Parser {
-    /**
-     * Parses the user's input string into a {@link ParsedCommand}.
-     *
-     * @param fullCommand Raw input entered by the user.
-     * @return A ParsedCommand representing the user's intent, or an error command if invalid.
-     */
+
 
     public static ParsedCommand parse(String input) {
 

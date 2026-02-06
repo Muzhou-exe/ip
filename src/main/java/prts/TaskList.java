@@ -33,7 +33,7 @@ public class TaskList {
     /**
      * Returns the task at the given 1-based task number.
      *
-     * @param taskNumber Task number shown to the user (1-based).
+
      * @return The task at the specified task number.
      * @throws IllegalArgumentException If the task number is out of range.
      */
@@ -48,7 +48,7 @@ public class TaskList {
     /**
      * Adds a task to the task list.
      *
-     * @param task The task to be added.
+
      */
 
     public void add(Task t) {
@@ -60,7 +60,6 @@ public class TaskList {
     /**
      * Deletes and returns the task at the given 1-based task number.
      *
-     * @param taskNumber Task number shown to the user (1-based).
      * @return The removed task.
      * @throws IllegalArgumentException If the task number is out of range.
      */
