@@ -108,4 +108,26 @@ public class Storage {
         }
         return t;
     }
+    public java.util.List<String> loadCheers() {
+        java.util.List<String> lines = new java.util.ArrayList<>();
+        try {
+            java.nio.file.Path p = java.nio.file.Paths.get("data/cheer.txt");
+            if (!java.nio.file.Files.exists(p)) {
+                // Create file if missing (optional but robust)
+                java.nio.file.Files.createDirectories(p.getParent());
+                java.nio.file.Files.writeString(p, "Keep going!\n");
+            }
+            for (String line : java.nio.file.Files.readAllLines(p)) {
+                String s = line.trim();
+                if (!s.isEmpty()) {
+                    lines.add(s);
+                }
+            }
+        } catch (Exception e) {
+            // fallback
+            lines.add("Keep going!");
+        }
+        return lines;
+    }
+
 }

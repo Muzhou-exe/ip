@@ -11,8 +11,9 @@ public class ParsedCommand {
     enum Type {
         TODO, DEADLINE, EVENT,
         DELETE, MARK, UNMARK,
-        LIST, BYE,
+        LIST, FIND, BYE,CHEER,
         ERROR
+
     }
 
     final Type type;
@@ -42,6 +43,9 @@ public class ParsedCommand {
         this.to = to;
         this.index = index;
         this.errorMessage = errorMessage;
+    }
+    static ParsedCommand cheer() {
+        return new ParsedCommand(Type.CHEER, null, null, null, null, -1, null);
     }
 
     static ParsedCommand bye() {
@@ -79,4 +83,9 @@ public class ParsedCommand {
     static ParsedCommand error(String msg) {
         return new ParsedCommand(Type.ERROR, null, null, null, null, -1, msg);
     }
+
+    static ParsedCommand find(String keyword) {
+        return new ParsedCommand(Type.FIND, keyword, null, null, null, -1, null);
+    }
+
 }

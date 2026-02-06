@@ -112,6 +112,18 @@ public class PRTS {
                     storage.save(taskList);
                     break;
                 }
+                case FIND: {
+                    ui.showFindResult(taskList.find(cmd.description));
+                    break;
+                }
+                case CHEER: {
+                    java.util.List<String> cheers = storage.loadCheers();
+                    java.util.Random r = new java.util.Random();
+                    String msg = cheers.get(r.nextInt(cheers.size()));
+                    ui.showCheer(msg);
+                    break;
+                }
+
                 default:
                     // should not reach
                     ui.showError("OOPS!!! I'm sorry, but I don't know what that means :-(");

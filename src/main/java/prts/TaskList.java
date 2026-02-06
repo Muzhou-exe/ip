@@ -54,6 +54,16 @@ public class TaskList {
         t.unmarkDone();
         return t;
     }
+    public List<Task> find(String keyword) {
+        List<Task> matches = new ArrayList<>();
+        for (Task t : tasks) {
+            if (t.toString().contains(keyword)) {
+                matches.add(t);
+            }
+        }
+        return matches;
+    }
+
 
     public List<Task> toList() {
         return new ArrayList<>(tasks);
