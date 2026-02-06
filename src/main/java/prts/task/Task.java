@@ -1,4 +1,5 @@
 package prts.task;
+
 public class Task {
     protected final String description;
     private boolean isDone;
