@@ -1,3 +1,9 @@
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.List;
 import java.util.Scanner;
 
 public class PRTS {
@@ -28,6 +34,9 @@ public class PRTS {
 
     private static final int MAX_TASKS = 100;
 
+    // Level-7 storage file (relative to project root)
+    private static final String DATA_FILE_PATH = "data/prts.txt";
+
     // ===================== Task classes =====================
 
     private static class Task {
@@ -46,8 +55,21 @@ public class PRTS {
             isDone = false;
         }
 
+        boolean isDone() {
+            return isDone;
+        }
+
         protected String statusIcon() {
             return "[" + (isDone ? "X" : " ") + "]";
+        }
+
+        /**
+         * Convert this task into a single-line storage format.
+         * Subclasses should override this to include their extra fields.
+         */
+        String toStorageString() {
+            // default as Todo
+            return "T | " + (isDone ? 1 : 0) + " | " + description;
         }
 
         @Override
@@ -62,6 +84,11 @@ public class PRTS {
         }
 
         @Override
+        String toStorageString() {
+            return "T | " + (isDone() ? 1 : 0) + " | " + description;
+        }
+
+        @Override
         public String toString() {
             return "[T]" + super.toString();
         }
@@ -73,6 +100,11 @@ public class PRTS {
         Deadline(String description, String by) {
             super(description);
             this.by = by;
+        }
+
+        @Override
+        String toStorageString() {
+            return "D | " + (isDone() ? 1 : 0) + " | " + description + " | " + by;
         }
 
         @Override
@@ -92,6 +124,11 @@ public class PRTS {
         }
 
         @Override
+        String toStorageString() {
+            return "E | " + (isDone() ? 1 : 0) + " | " + description + " | " + from + " | " + to;
+        }
+
+        @Override
         public String toString() {
             return "[E]" + super.toString() + " (from: " + from + " to: " + to + ")";
         }
@@ -105,8 +142,9 @@ public class PRTS {
         System.out.println("What can I do for you?");
 
         Scanner scanner = new Scanner(System.in);
+
         Task[] tasks = new Task[MAX_TASKS];
-        int taskCount = 0;
+        int taskCount = loadTasks(tasks);
 
         while (true) {
             String input = scanner.nextLine().trim();
@@ -155,6 +193,7 @@ public class PRTS {
                 taskCount--;
 
                 printDeletedTask(removed, taskCount);
+                saveTasks(tasks, taskCount);
                 continue;
             }
 
@@ -178,6 +217,7 @@ public class PRTS {
                 Task t = new Todo(desc);
                 tasks[taskCount++] = t;
                 printAddedTask(t, taskCount);
+                saveTasks(tasks, taskCount);
                 continue;
             }
 
@@ -215,6 +255,7 @@ public class PRTS {
                 Task t = new Deadline(desc, by);
                 tasks[taskCount++] = t;
                 printAddedTask(t, taskCount);
+                saveTasks(tasks, taskCount);
                 continue;
             }
 
@@ -263,6 +304,7 @@ public class PRTS {
                 Task t = new Event(desc, from, to);
                 tasks[taskCount++] = t;
                 printAddedTask(t, taskCount);
+                saveTasks(tasks, taskCount);
                 continue;
             }
 
@@ -285,6 +327,7 @@ public class PRTS {
                 tasks[index - 1].markDone();
                 System.out.println("Nice! I've marked this task as done:");
                 System.out.println(tasks[index - 1]);
+                saveTasks(tasks, taskCount);
                 continue;
             }
 
@@ -306,6 +349,7 @@ public class PRTS {
                 tasks[index - 1].unmarkDone();
                 System.out.println("OK, I've marked this task as not done yet:");
                 System.out.println(tasks[index - 1]);
+                saveTasks(tasks, taskCount);
                 continue;
             }
 
@@ -313,6 +357,8 @@ public class PRTS {
             System.out.println("OOPS!!! I'm sorry, but I don't know what that means :-(");
         }
     }
+
+    // ===================== UI Helpers =====================
 
     private static void printAddedTask(Task task, int taskCount) {
         System.out.println("Got it. I've added this task:");
@@ -332,5 +378,101 @@ public class PRTS {
         } catch (NumberFormatException e) {
             return null;
         }
+    }
+
+    // ===================== Level-7 Storage =====================
+
+    private static void ensureDataFileExists() throws IOException {
+        Path file = Paths.get(DATA_FILE_PATH);
+        Path parent = file.getParent();
+        if (parent != null && !Files.exists(parent)) {
+            Files.createDirectories(parent);
+        }
+        if (!Files.exists(file)) {
+            Files.createFile(file);
+        }
+    }
+
+    private static int loadTasks(Task[] tasks) {
+        try {
+            ensureDataFileExists();
+            List<String> lines = Files.readAllLines(Paths.get(DATA_FILE_PATH));
+
+            int count = 0;
+            for (String line : lines) {
+                if (line.trim().isEmpty()) {
+                    continue;
+                }
+                Task t = parseTaskFromLine(line);
+                if (t == null) {
+                    // Corrupted / unknown line -> skip (do not crash)
+                    continue;
+                }
+                if (count >= tasks.length) {
+                    break;
+                }
+                tasks[count++] = t;
+            }
+            return count;
+        } catch (IOException e) {
+            // If loading fails, start with empty list (do not crash)
+            return 0;
+        }
+    }
+
+    private static void saveTasks(Task[] tasks, int taskCount) {
+        try {
+            ensureDataFileExists();
+            Path file = Paths.get(DATA_FILE_PATH);
+            try (BufferedWriter bw = Files.newBufferedWriter(file)) {
+                for (int i = 0; i < taskCount; i++) {
+                    bw.write(tasks[i].toStorageString());
+                    bw.newLine();
+                }
+            }
+        } catch (IOException e) {
+            // Saving failure should not crash the app
+            System.out.println("Warning: failed to save tasks to disk.");
+        }
+    }
+
+    private static Task parseTaskFromLine(String line) {
+        // Format: TYPE | doneFlag | desc | ...
+        String[] parts = line.split("\\s*\\|\\s*");
+        if (parts.length < 3) {
+            return null;
+        }
+
+        String type = parts[0].trim();
+        String doneFlag = parts[1].trim();
+        String desc = parts[2].trim();
+
+        boolean done = "1".equals(doneFlag);
+
+        Task t;
+        switch (type) {
+            case "T":
+                t = new Todo(desc);
+                break;
+            case "D":
+                if (parts.length < 4) {
+                    return null;
+                }
+                t = new Deadline(desc, parts[3].trim());
+                break;
+            case "E":
+                if (parts.length < 5) {
+                    return null;
+                }
+                t = new Event(desc, parts[3].trim(), parts[4].trim());
+                break;
+            default:
+                return null;
+        }
+
+        if (done) {
+            t.markDone();
+        }
+        return t;
     }
 }
