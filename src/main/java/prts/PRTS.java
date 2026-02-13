@@ -1,37 +1,15 @@
 package prts;
 
-import java.util.Scanner;
-
 import prts.task.Deadline;
 import prts.task.Event;
 import prts.task.Task;
 import prts.task.Todo;
 
+/**
+ * Main logic class for PRTS. Provides responses for GUI interaction.
+ */
 public class PRTS {
 
-    private static final String LOGO = """
-                      _____                    _____                _____                    _____
-                     /\\    \\                  /\\    \\              /\\    \\                  /\\    \\
-                    /::\\    \\                /::\\    \\            /::\\    \\                /::\\    \\
-                   /::::\\    \\              /::::\\    \\           \\:::\\    \\              /::::\\    \\
-                  /::::::\\    \\            /::::::\\    \\           \\:::\\    \\            /::::::\\    \\
-                 /:::/\\:::\\    \\          /:::/\\:::\\    \\           \\:::\\    \\          /:::/\\:::\\    \\
-                /:::/__\\:::\\    \\        /:::/__\\:::\\    \\           \\:::\\    \\        /:::/__\\:::\\    \\
-               /::::\\   \\:::\\    \\      /::::\\   \\:::\\    \\          /::::\\    \\       \\:::\\   \\:::\\    \\
-              /::::::\\   \\:::\\    \\    /::::::\\   \\:::\\    \\        /::::::\\    \\    ___\\:::\\   \\:::\\    \\
-             /:::/\\:::\\   \\:::\\____\\  /:::/\\:::\\   \\:::\\____\\      /:::/\\:::\\    \\  /\\   \\:::\\   \\:::\\    \\
-            /:::/  \\:::\\   \\:::|    |/:::/  \\:::\\   \\:::|    |    /:::/  \\:::\\____\\/::\\   \\:::\\   \\:::\\____\\
-            \\::/    \\:::\\  /:::|____|\\::/   |::::\\  /:::|____|   /:::/    \\::/    /\\:::\\   \\:::\\   \\::/    /
-             \\/_____/\\:::\\/:::/    /  \\/____|:::::\\/:::/    /   /:::/    / \\/____/  \\:::\\   \\:::\\   \\/____/
-                      \\::::::/    /         |:::::::::/    /   /:::/    /            \\:::\\   \\:::\\    \\
-                       \\::::/    /          |::|\\::::/    /   /:::/    /              \\:::\\   \\:::\\____\\
-                        \\::/____/           |::| \\::/____/    \\::/    /                \\:::\\  /:::/    /
-                         ~~                 |::|  ~|           \\/____/                  \\:::\\/:::/    /
-                                            |::|   |                                     \\::::::/    /
-                                            \\::|   |                                      \\::::/    /
-                                             \\:|   |                                       \\::/    /
-                                              \\|___|                                        \\/____/
-""";
     private final Storage storage;
     private final TaskList taskList;
     private final Ui ui;
@@ -46,104 +24,60 @@ public class PRTS {
                 temp.addTask(t);
             }
         } catch (Exception e) {
-            ui.showError("Error loading file, starting with empty list.");
             temp = new TaskList(100);
         }
         taskList = temp;
     }
 
-    public static void main(String[] args) {
-        new PRTS("data/tasks.txt").run();
-    }
-
-    public void run() {
-        ui.showLogo(LOGO);
-        ui.showWelcome();
-
-        Scanner sc = new Scanner(System.in);
-        boolean isRunning = true;
-
-        while (isRunning && sc.hasNextLine()) {
-            String input = sc.nextLine().trim();
-            if (input.isEmpty()) continue;
-
-            ParsedCommand cmd = Parser.parse(input);
-
-            try {
-                switch (cmd.type) {
-                    case BYE:
-                        isRunning = false;
-                        ui.showBye();
-                        break;
-                    case ERROR:
-                        ui.showError(cmd.errorMessage);
-                        break;
-                    case LIST:
-                        ui.showList(taskList);
-                        break;
-                    case TODO: {
-                        Task t = new Todo(cmd.description);
-                        taskList.addTask(t);
-                        ui.showAdded(t, taskList.size());
-                        storage.save(taskList);
-                        break;
-                    }
-                    case DEADLINE: {
-                        Task t = new Deadline(cmd.description, cmd.byDate);
-                        taskList.addTask(t);
-                        ui.showAdded(t, taskList.size());
-                        storage.save(taskList);
-                        break;
-                    }
-                    case EVENT: {
-                        Task t = new Event(cmd.description, cmd.from, cmd.to);
-                        taskList.addTask(t);
-                        ui.showAdded(t, taskList.size());
-                        storage.save(taskList);
-                        break;
-                    }
-                    case DELETE: {
-                        Task removed = taskList.delete(cmd.index);
-                        ui.showDeleted(removed, taskList.size());
-                        storage.save(taskList);
-                        break;
-                    }
-                    case MARK: {
-                        Task t = taskList.mark(cmd.index);
-                        ui.showMarked(t);
-                        storage.save(taskList);
-                        break;
-                    }
-                    case UNMARK: {
-                        Task t = taskList.unmark(cmd.index);
-                        ui.showUnmarked(t);
-                        storage.save(taskList);
-                        break;
-                    }
-                    case FIND: {
-                        ui.showFindResult(taskList.find(cmd.description));
-                        break;
-                    }
-                    case CHEER: {
-                        java.util.List<String> cheers = storage.loadCheers();
-                        java.util.Random r = new java.util.Random();
-                        if (!cheers.isEmpty()) {
-                            ui.showCheer(cheers.get(r.nextInt(cheers.size())));
-                        } else {
-                            ui.showCheer("Keep going!");
-                        }
-                        break;
-                    }
-
-                    default:
-                        // should not reach
-                        ui.showError("OOPS!!! I'm sorry, but I don't know what that means :-(");
-                        break;
-                }
-            } catch (IllegalArgumentException | IllegalStateException e) {
-                // Catch both Argument error (index out of bounds) and State error (list full)
-                ui.showError(e.getMessage());
+    /**
+     * Processes user input and returns the chatbot response.
+     */
+    public String getResponse(String input) {
+        if (input == null || input.trim().isEmpty()) return "";
+        ParsedCommand cmd = Parser.parse(input);
+        try {
+            switch (cmd.type) {
+                case BYE: return ui.getBye();
+                case LIST: return ui.getListString(taskList);
+                case TODO:
+                    Task t = new Todo(cmd.description);
+                    taskList.addTask(t);
+                    storage.save(taskList);
+                    return ui.getAddedString(t, taskList.size());
+                case DEADLINE:
+                    Task d = new Deadline(cmd.description, cmd.byDate);
+                    taskList.addTask(d);
+                    storage.save(taskList);
+                    return ui.getAddedString(d, taskList.size());
+                case EVENT:
+                    Task e = new Event(cmd.description, cmd.from, cmd.to);
+                    taskList.addTask(e);
+                    storage.save(taskList);
+                    return ui.getAddedString(e, taskList.size());
+                case DELETE:
+                    Task removed = taskList.delete(cmd.index);
+                    storage.save(taskList);
+                    return ui.getDeletedString(removed, taskList.size());
+                case MARK:
+                    Task m = taskList.mark(cmd.index);
+                    storage.save(taskList);
+                    return ui.getMarkedString(m);
+                case UNMARK:
+                    Task u = taskList.unmark(cmd.index);
+                    storage.save(taskList);
+                    return ui.getUnmarkedString(u);
+                case FIND:
+                    return ui.getFindResultString(taskList.find(cmd.description));
+                case CHEER:
+                    java.util.List<String> cheers = storage.loadCheers();
+                    String msg = cheers.isEmpty() ? "Keep going!" :
+                            cheers.get(new java.util.Random().nextInt(cheers.size()));
+                    return ui.getCheerString(msg);
+                case ERROR: return ui.getErrorString(cmd.errorMessage);
+                default: return ui.getErrorString("Unknown command.");
             }
+        } catch (Exception ex) {
+            return ui.getErrorString(ex.getMessage());
         }
     }
 }

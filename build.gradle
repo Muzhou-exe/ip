@@ -2,10 +2,17 @@ plugins {
     id 'java'
     id 'application'
     id 'com.github.johnrengelman.shadow' version '7.1.2'
+    id 'org.openjfx.javafxplugin' version '0.0.13'
 }
 
 repositories {
     mavenCentral()
+}
+
+
+javafx {
+    version = "17"
+    modules = [ 'javafx.controls', 'javafx.fxml' ]
 }
 
 dependencies {
@@ -28,7 +35,8 @@ test {
 }
 
 application {
-    mainClass.set("prts.PRTS")
+
+    mainClass.set("prts.Launcher")
 }
 
 shadowJar {
@@ -36,13 +44,15 @@ shadowJar {
     archiveClassifier = null
 }
 
-run{
+run {
     standardInput = System.in
 }
+
 jar {
     manifest {
         attributes(
-                'Main-Class': 'prts.PRTS'
+
+                'Main-Class': 'prts.Launcher'
         )
     }
 }

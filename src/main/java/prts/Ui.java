@@ -1,71 +1,62 @@
 package prts;
 
 import java.util.List;
-
 import prts.task.Task;
 
 /**
- * Handles all user interaction for the chatbot.
- * <p>
- * This class is responsible for displaying messages and reading user input.
- * </p>
+ * Handles user interaction by returning strings for GUI display.
  */
 public class Ui {
 
-    public void showLogo(String logo) {
-        System.out.print(logo);
+    public String getWelcome() {
+        return "Welcome back, Doctor!\nWhat can I do for you?";
     }
 
-    public void showWelcome() {
-        System.out.println("Welcome back, Doctor!");
-        System.out.println("What can I do for you?");
+    public String getBye() {
+        return "Bye. Hope to see you again soon!";
     }
 
-    public void showBye() {
-        System.out.println("Bye. Hope to see you again soon!");
-    }
-
-    public void showCheer(String msg) {
-        System.out.println(msg);
-    }
-
-    public void showList(TaskList tasks) {
-        System.out.println("Here are the tasks in your list:");
+    public String getListString(TaskList tasks) {
+        if (tasks.size() == 0) return "The task list is currently empty.";
+        StringBuilder sb = new StringBuilder("Here are the tasks in your list:\n");
         for (int i = 1; i <= tasks.size(); i++) {
-            System.out.println(i + "." + tasks.get(i));
+            sb.append(i).append(".").append(tasks.get(i)).append("\n");
         }
+        return sb.toString();
     }
 
-    public void showAdded(Task task, int taskCount) {
-        System.out.println("Got it. I've added this task:");
-        System.out.println(task);
-        System.out.println("Now you have " + taskCount + " tasks in the list.");
+    public String getAddedString(Task task, int taskCount) {
+        return "Got it. I've added this task:\n  " + task
+                + "\nNow you have " + taskCount + " tasks in the list.";
     }
 
-    public void showDeleted(Task task, int taskCount) {
-        System.out.println("Noted. I've removed this task:");
-        System.out.println(task);
-        System.out.println("Now you have " + taskCount + " tasks in the list.");
+    public String getDeletedString(Task task, int taskCount) {
+        return "Noted. I've removed this task:\n  " + task
+                + "\nNow you have " + taskCount + " tasks in the list.";
     }
 
-    public void showMarked(Task task) {
-        System.out.println("Nice! I've marked this task as done:");
-        System.out.println(task);
+    public String getMarkedString(Task task) {
+        return "Nice! I've marked this task as done:\n  " + task;
     }
 
-    public void showUnmarked(Task task) {
-        System.out.println("OK, I've marked this task as not done yet:");
-        System.out.println(task);
+    public String getUnmarkedString(Task task) {
+        return "OK, I've marked this task as not done yet:\n  " + task;
     }
 
-    public void showFindResult(List<Task> tasks) {
-        System.out.println("Here are the matching tasks in your list:");
-        for (int i = 0; i < tasks.size(); i++) {
-            System.out.println((i + 1) + "." + tasks.get(i));
+    public String getFindResultString(List<Task> matches) {
+        if (matches.isEmpty()) return "No matching tasks found.";
+        StringBuilder sb = new StringBuilder("Here are the matching tasks in your list:\n");
+        for (int i = 0; i < matches.size(); i++) {
+            sb.append(i + 1).append(".").append(matches.get(i)).append("\n");
         }
+        return sb.toString();
     }
 
-    public void showError(String message) {
-        System.out.println(message);
+    public String getErrorString(String msg) {
+        return "Error: " + msg;
+    }
+
+    public String getCheerString(String msg) {
+        return msg;
     }
 }
