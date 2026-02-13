@@ -1,13 +1,5 @@
-
 package prts;
-/**
- * Handles loading and saving task data to disk.
- * <p>
- * This class manages file I/O operations for persistent storage.
- * </p>
- */
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -17,11 +9,17 @@ import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 
-import prts.task.Task;
-import prts.task.Todo;
 import prts.task.Deadline;
 import prts.task.Event;
+import prts.task.Task;
+import prts.task.Todo;
 
+/**
+ * Handles loading and saving task data to disk.
+ * <p>
+ * This class manages file I/O operations for persistent storage.
+ * </p>
+ */
 public class Storage {
 
     private final String filePath;
@@ -29,14 +27,14 @@ public class Storage {
     public Storage(String filePath) {
         this.filePath = filePath;
     }
+
     /**
      * Loads tasks from the data file.
      *
      * @return A list of tasks loaded from disk.
      * @throws IOException If reading from the file fails.
      */
-
-    public List<Task> load() {
+    public List<Task> load() throws IOException {
         try {
             ensureDataFileExists();
 
@@ -47,61 +45,54 @@ public class Storage {
                 if (line.trim().isEmpty()) {
                     continue;
                 }
-                Task t = parseTaskFromLine(line);
+                Task t = parseTask(line);
                 if (t != null) {
                     result.add(t);
                 }
             }
             return result;
         } catch (IOException e) {
-            return new ArrayList<>();
+            throw e;
         }
     }
-    /**
-     * Saves the given list of tasks to disk.
-     *
-     * @param tasks The list of tasks to be saved.
-     * @throws IOException If writing to the file fails.
-     */
 
-    public void save(TaskList tasks) {
+    public void save(TaskList taskList) {
         try {
             ensureDataFileExists();
-            Path file = Paths.get(filePath);
-            try (BufferedWriter bw = Files.newBufferedWriter(file)) {
-                for (Task t : tasks.toList()) {
-                    bw.write(t.toStorageString());
-                    bw.newLine();
-                }
+            List<String> lines = new ArrayList<>();
+            for (Task t : taskList.toList()) {
+                lines.add(t.toStorageString());
             }
+            Files.write(Paths.get(filePath), lines);
         } catch (IOException e) {
-            System.out.println("Warning: failed to save tasks to disk.");
+            System.out.println("OOPS!!! Error saving tasks: " + e.getMessage());
         }
     }
 
     private void ensureDataFileExists() throws IOException {
-        Path file = Paths.get(filePath);
-        Path parent = file.getParent();
-        if (parent != null && !Files.exists(parent)) {
-            Files.createDirectories(parent);
-        }
-        if (!Files.exists(file)) {
-            Files.createFile(file);
+        Path p = Paths.get(filePath);
+        if (!Files.exists(p)) {
+            if (p.getParent() != null) {
+                Files.createDirectories(p.getParent());
+            }
+            Files.createFile(p);
         }
     }
 
-    private Task parseTaskFromLine(String line) {
+    private Task parseTask(String line) {
+        // Expected format: TYPE | DONE | DESC | [EXTRA]
         String[] parts = line.split("\\s*\\|\\s*");
         if (parts.length < 3) {
             return null;
         }
 
-        String type = parts[0].trim();
-        String doneFlag = parts[1].trim();
-        String desc = parts[2].trim();
-        boolean done = "1".equals(doneFlag);
+        String type = parts[0];
+        boolean done = "1".equals(parts[1]);
+        String desc = parts[2];
 
-        Task t;
+        Task t = null; // Initialize to null
+
+        // Fixed switch-case indentation
         switch (type) {
             case "T":
                 t = new Todo(desc);
@@ -124,31 +115,29 @@ public class Storage {
                 return null;
         }
 
-        if (done) {
+        if (t != null && done) {
             t.markDone();
         }
         return t;
     }
+
     public java.util.List<String> loadCheers() {
         java.util.List<String> lines = new java.util.ArrayList<>();
         try {
-            java.nio.file.Path p = java.nio.file.Paths.get("data/cheer.txt");
-            if (!java.nio.file.Files.exists(p)) {
-                // Create file if missing (optional but robust)
-                java.nio.file.Files.createDirectories(p.getParent());
-                java.nio.file.Files.writeString(p, "Keep going!\n");
+            Path p = Paths.get("data/cheer.txt");
+            if (!Files.exists(p)) {
+                Files.createDirectories(p.getParent());
+                Files.writeString(p, "Keep going!\n");
             }
-            for (String line : java.nio.file.Files.readAllLines(p)) {
+            for (String line : Files.readAllLines(p)) {
                 String s = line.trim();
                 if (!s.isEmpty()) {
                     lines.add(s);
                 }
             }
-        } catch (Exception e) {
-            // fallback
-            lines.add("Keep going!");
+        } catch (IOException e) {
+            lines.add("You can do it!");
         }
         return lines;
     }
-
 }

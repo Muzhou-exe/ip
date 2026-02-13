@@ -1,18 +1,15 @@
-
-
 package prts;
+
+import java.util.List;
+
+import prts.task.Task;
+
 /**
  * Handles all user interaction for the chatbot.
  * <p>
  * This class is responsible for displaying messages and reading user input.
  * </p>
  */
-import prts.task.Task;
-import prts.task.Todo;
-import prts.task.Deadline;
-import prts.task.Event;
-import java.util.List;
-
 public class Ui {
 
     public void showLogo(String logo) {
@@ -60,13 +57,13 @@ public class Ui {
         System.out.println("OK, I've marked this task as not done yet:");
         System.out.println(task);
     }
+
     public void showFindResult(List<Task> tasks) {
         System.out.println("Here are the matching tasks in your list:");
         for (int i = 0; i < tasks.size(); i++) {
             System.out.println((i + 1) + "." + tasks.get(i));
         }
     }
-
 
     public void showError(String message) {
         System.out.println(message);

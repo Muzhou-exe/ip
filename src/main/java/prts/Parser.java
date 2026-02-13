@@ -1,5 +1,8 @@
-
 package prts;
+
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
+
 /**
  * Parses raw user input into executable commands.
  * <p>
@@ -7,17 +10,7 @@ package prts;
  * into {@link ParsedCommand} objects.
  * </p>
  */
-
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
-
-import prts.task.Task;
-import prts.task.Todo;
-import prts.task.Deadline;
-import prts.task.Event;
-
 public class Parser {
-
 
     public static ParsedCommand parse(String input) {
 
@@ -31,7 +24,7 @@ public class Parser {
         if (input.equals("list")) {
             return ParsedCommand.list();
         }
-        // find (Level-9)
+        // find
         if (input.equals("find")) {
             return ParsedCommand.error("OOPS!!! Usage: find <keyword>");
         }
@@ -56,81 +49,6 @@ public class Parser {
                 return ParsedCommand.error("OOPS!!! That task number is out of range.");
             }
             return ParsedCommand.delete(idx);
-        }
-
-        // todo
-        if (input.equals("todo")) {
-            return ParsedCommand.error("OOPS!!! The description of a todo cannot be empty.");
-        }
-        if (input.startsWith("todo ")) {
-            String desc = input.substring(5).trim();
-            if (desc.isEmpty()) {
-                return ParsedCommand.error("OOPS!!! The description of a todo cannot be empty.");
-            }
-            return ParsedCommand.todo(desc);
-        }
-
-        // deadline (Level-8)
-        if (input.equals("deadline")) {
-            return ParsedCommand.error("OOPS!!! The description of a deadline cannot be empty.");
-        }
-        if (input.startsWith("deadline ")) {
-            if (!input.contains(" /by ")) {
-                return ParsedCommand.error("OOPS!!! The format for deadline is: deadline <description> /by <yyyy-mm-dd>");
-            }
-            String rest = input.substring(8).trim();
-            String[] parts = rest.split(" /by ", 2);
-
-            String desc = parts.length > 0 ? parts[0].trim() : "";
-            String by = parts.length > 1 ? parts[1].trim() : "";
-
-            if (desc.isEmpty()) {
-                return ParsedCommand.error("OOPS!!! The description of a deadline cannot be empty.");
-            }
-            if (by.isEmpty()) {
-                return ParsedCommand.error("OOPS!!! The /by part of a deadline cannot be empty.");
-            }
-
-            try {
-                LocalDate byDate = LocalDate.parse(by);
-                return ParsedCommand.deadline(desc, byDate);
-            } catch (DateTimeParseException e) {
-                return ParsedCommand.error("OOPS!!! Please use date format yyyy-mm-dd, e.g., 2019-10-15");
-            }
-        }
-
-        // event
-        if (input.equals("event")) {
-            return ParsedCommand.error("OOPS!!! The description of an event cannot be empty.");
-        }
-        if (input.startsWith("event ")) {
-            if (!input.contains(" /from ") || !input.contains(" /to ")) {
-                return ParsedCommand.error("OOPS!!! The format for event is: event <description> /from <from> /to <to>");
-            }
-
-            String rest = input.substring(5).trim();
-            int fromPos = rest.indexOf(" /from ");
-            int toPos = rest.indexOf(" /to ");
-
-            if (fromPos < 0 || toPos < 0 || toPos < fromPos) {
-                return ParsedCommand.error("OOPS!!! The format for event is: event <description> /from <from> /to <to>");
-            }
-
-            String desc = rest.substring(0, fromPos).trim();
-            String from = rest.substring(fromPos + 7, toPos).trim();
-            String to = rest.substring(toPos + 5).trim();
-
-            if (desc.isEmpty()) {
-                return ParsedCommand.error("OOPS!!! The description of an event cannot be empty.");
-            }
-            if (from.isEmpty()) {
-                return ParsedCommand.error("OOPS!!! The /from part of an event cannot be empty.");
-            }
-            if (to.isEmpty()) {
-                return ParsedCommand.error("OOPS!!! The /to part of an event cannot be empty.");
-            }
-
-            return ParsedCommand.event(desc, from, to);
         }
 
         // mark / unmark
@@ -160,6 +78,67 @@ public class Parser {
                 return ParsedCommand.error("OOPS!!! That task number is out of range.");
             }
             return ParsedCommand.unmark(idx);
+        }
+
+        // Task creation
+        if (input.equals("todo")) {
+            return ParsedCommand.error("OOPS!!! The description of a todo cannot be empty.");
+        }
+        if (input.startsWith("todo ")) {
+            String desc = input.substring(5).trim();
+            if (desc.isEmpty()) {
+                return ParsedCommand.error("OOPS!!! The description of a todo cannot be empty.");
+            }
+            return ParsedCommand.todo(desc);
+        }
+
+        if (input.equals("deadline")) {
+            return ParsedCommand.error("OOPS!!! Usage: deadline <desc> /by <date>");
+        }
+        if (input.startsWith("deadline ")) {
+            String body = input.substring(9).trim();
+            int byIdx = body.indexOf("/by");
+            if (byIdx == -1) {
+                return ParsedCommand.error("OOPS!!! Usage: deadline <desc> /by <date>");
+            }
+            String desc = body.substring(0, byIdx).trim();
+            String byStr = body.substring(byIdx + 3).trim();
+            if (desc.isEmpty() || byStr.isEmpty()) {
+                return ParsedCommand.error("OOPS!!! Description and deadline cannot be empty.");
+            }
+
+            try {
+                LocalDate d = LocalDate.parse(byStr);
+                return ParsedCommand.deadline(desc, d);
+            } catch (DateTimeParseException e) {
+                // Fallback or error?
+                // Spec says we can accept yyyy-mm-dd. Let's force it or fail.
+                return ParsedCommand.error("OOPS!!! Invalid date format. Please use yyyy-mm-dd.");
+            }
+        }
+
+        if (input.equals("event")) {
+            return ParsedCommand.error("OOPS!!! Usage: event <desc> /from <start> /to <end>");
+        }
+        if (input.startsWith("event ")) {
+            String body = input.substring(6).trim();
+            int fromIdx = body.indexOf("/from");
+            int toIdx = body.indexOf("/to");
+            if (fromIdx == -1 || toIdx == -1) {
+                return ParsedCommand.error("OOPS!!! Usage: event <desc> /from <start> /to <end>");
+            }
+            if (fromIdx > toIdx) {
+                return ParsedCommand.error("OOPS!!! /from must come before /to");
+            }
+
+            String desc = body.substring(0, fromIdx).trim();
+            String from = body.substring(fromIdx + 5, toIdx).trim();
+            String to = body.substring(toIdx + 3).trim();
+
+            if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
+                return ParsedCommand.error("OOPS!!! All event fields cannot be empty.");
+            }
+            return ParsedCommand.event(desc, from, to);
         }
 
         // unknown

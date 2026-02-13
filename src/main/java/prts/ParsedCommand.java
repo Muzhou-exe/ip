@@ -1,5 +1,7 @@
-
 package prts;
+
+import java.time.LocalDate;
+
 /**
  * Represents a parsed user command.
  * <p>
@@ -7,23 +9,13 @@ package prts;
  * extracted from the user's raw input.
  * </p>
  */
-
-
-import prts.task.Task;
-import prts.task.Todo;
-import prts.task.Deadline;
-import prts.task.Event;
-
-import java.time.LocalDate;
-
 public class ParsedCommand {
 
     enum Type {
         TODO, DEADLINE, EVENT,
         DELETE, MARK, UNMARK,
-        LIST, FIND, BYE,CHEER,
+        LIST, FIND, BYE, CHEER,
         ERROR
-
     }
 
     final Type type;
@@ -54,6 +46,7 @@ public class ParsedCommand {
         this.index = index;
         this.errorMessage = errorMessage;
     }
+
     static ParsedCommand cheer() {
         return new ParsedCommand(Type.CHEER, null, null, null, null, -1, null);
     }
@@ -90,12 +83,11 @@ public class ParsedCommand {
         return new ParsedCommand(Type.UNMARK, null, null, null, null, index, null);
     }
 
-    static ParsedCommand error(String msg) {
-        return new ParsedCommand(Type.ERROR, null, null, null, null, -1, msg);
-    }
-
     static ParsedCommand find(String keyword) {
         return new ParsedCommand(Type.FIND, keyword, null, null, null, -1, null);
     }
 
+    static ParsedCommand error(String msg) {
+        return new ParsedCommand(Type.ERROR, null, null, null, null, -1, msg);
+    }
 }

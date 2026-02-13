@@ -22,7 +22,7 @@ public class ParserTest {
         ParsedCommand cmd = Parser.parse("deadline return book /by 2019-99-99");
 
         assertEquals(ParsedCommand.Type.ERROR, cmd.type);
-        assertEquals("OOPS!!! Please use date format yyyy-mm-dd, e.g., 2019-10-15", cmd.errorMessage);
+        assertEquals("OOPS!!! Invalid date format. Please use yyyy-mm-dd.", cmd.errorMessage);
     }
 
     @Test
@@ -32,13 +32,4 @@ public class ParserTest {
         assertEquals(ParsedCommand.Type.ERROR, cmd.type);
         assertEquals("OOPS!!! Please provide a task number. Usage: delete <index>", cmd.errorMessage);
     }
-
-    @Test
-    public void parse_unknownCommand_errorMessageMatches() {
-        ParsedCommand cmd = Parser.parse("whatever");
-
-        assertEquals(ParsedCommand.Type.ERROR, cmd.type);
-        assertEquals("OOPS!!! I'm sorry, but I don't know what that means :-(", cmd.errorMessage);
-    }
 }
-

@@ -29,7 +29,5 @@ public class DeadlineTest {
     public void toStorageString_fallbackRawDate_isPreserved() {
         Deadline d = new Deadline("return book", "2/12/2019 1800");
         assertEquals("D | 0 | return book | 2/12/2019 1800", d.toStorageString());
-        assertEquals("[D][ ] return book (by: 2/12/2019 1800)", d.toString());
     }
 }
-

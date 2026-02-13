@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
+/**
+ * Represents a task with a deadline.
+ */
 public class Deadline extends Task {
 
     private static final DateTimeFormatter OUT_DATE_FMT =
@@ -12,12 +15,24 @@ public class Deadline extends Task {
     private final LocalDate byDate; // preferred
     private final String byRaw;     // fallback
 
+    /**
+     * Constructs a Deadline with a LocalDate object.
+     *
+     * @param description The task description.
+     * @param byDate The deadline date.
+     */
     public Deadline(String description, LocalDate byDate) {
         super(description);
         this.byDate = byDate;
         this.byRaw = null;
     }
 
+    /**
+     * Constructs a Deadline with a raw string (fallback).
+     *
+     * @param description The task description.
+     * @param byRaw The raw deadline string.
+     */
     public Deadline(String description, String byRaw) {
         super(description);
         this.byDate = null;

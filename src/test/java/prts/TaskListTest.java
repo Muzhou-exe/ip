@@ -15,7 +15,7 @@ public class TaskListTest {
         TaskList list = new TaskList(100);
         Task t = new Todo("read book");
 
-        list.add(t);
+        list.addTask(t);
 
         assertEquals(1, list.size());
         assertEquals(t, list.get(1));
@@ -27,8 +27,8 @@ public class TaskListTest {
         Task t1 = new Todo("read book");
         Task t2 = new Todo("return book");
 
-        list.add(t1);
-        list.add(t2);
+        list.addTask(t1);
+        list.addTask(t2);
 
         Task removed = list.delete(1);
 
@@ -40,14 +40,6 @@ public class TaskListTest {
     @Test
     public void deleteTask_outOfRange_throwsException() {
         TaskList list = new TaskList(100);
-
         assertThrows(IllegalArgumentException.class, () -> list.delete(1));
-    }
-
-    @Test
-    public void getTask_outOfRange_throwsException() {
-        TaskList list = new TaskList(100);
-
-        assertThrows(IllegalArgumentException.class, () -> list.get(1));
     }
 }

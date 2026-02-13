@@ -1,6 +1,10 @@
-
-
 package prts;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import prts.task.Task;
+
 /**
  * Represents a list of tasks managed by the chatbot.
  * <p>
@@ -8,28 +12,19 @@ package prts;
  * to the first task shown to the user.
  * </p>
  */
-import java.util.ArrayList;
-import java.util.List;
-
-import prts.task.Task;
-import prts.task.Todo;
-import prts.task.Deadline;
-import prts.task.Event;
-
 public class TaskList {
 
-    private final int maxSize;
-    private final ArrayList<Task> tasks = new ArrayList<>();
+    private final int MAX_SIZE; // Coding standard: CONSTANT_CASE
+    private final ArrayList<Task> tasks = new ArrayList<>(); // Initialize at declaration
 
     public TaskList(int maxSize) {
-        this.maxSize = maxSize;
+        this.MAX_SIZE = maxSize;
     }
 
     public int size() {
         return tasks.size();
     }
 
-    // 1-based access for printing
     /**
      * Returns the task at the given 1-based task number.
      *
@@ -37,33 +32,35 @@ public class TaskList {
      * @return The task at the specified task number.
      * @throws IllegalArgumentException If the task number is out of range.
      */
-
-    public Task get(int oneBasedIndex) {
+    public Task get(int oneBasedIndex) throws IllegalArgumentException {
         int i = oneBasedIndex - 1;
         if (i < 0 || i >= tasks.size()) {
             throw new IllegalArgumentException("OOPS!!! That task number is out of range.");
         }
         return tasks.get(i);
     }
+
     /**
-     * Adds a task to the task list.
+     * Adds a task to the list.
      *
-
+     * @param t The task to add.
+     * @throws IllegalStateException If the task list is full.
      */
-
-    public void add(Task t) {
-        if (tasks.size() >= maxSize) {
-            throw new IllegalArgumentException("OOPS!!! Your task list is full (max " + maxSize + " tasks).");
+    public void addTask(Task t) {
+        if (tasks.size() >= MAX_SIZE) {
+            // Defensive coding: Throw exception instead of silent failure/break
+            throw new IllegalStateException("OOPS!!! Your task list is full (max " + MAX_SIZE + " tasks).");
         }
         tasks.add(t);
     }
+
     /**
      * Deletes and returns the task at the given 1-based task number.
      *
+     * @param oneBasedIndex The 1-based index of the task.
      * @return The removed task.
      * @throws IllegalArgumentException If the task number is out of range.
      */
-
     public Task delete(int oneBasedIndex) {
         int i = oneBasedIndex - 1;
         if (i < 0 || i >= tasks.size()) {
@@ -73,7 +70,7 @@ public class TaskList {
     }
 
     public Task mark(int oneBasedIndex) {
-        Task t = get(oneBasedIndex);
+        Task t = get(oneBasedIndex); // utilize get() which handles bounds check
         t.markDone();
         return t;
     }
@@ -83,6 +80,7 @@ public class TaskList {
         t.unmarkDone();
         return t;
     }
+
     public List<Task> find(String keyword) {
         List<Task> matches = new ArrayList<>();
         for (Task t : tasks) {
@@ -93,17 +91,7 @@ public class TaskList {
         return matches;
     }
 
-
     public List<Task> toList() {
         return new ArrayList<>(tasks);
-    }
-
-    public void addAll(List<Task> loaded) {
-        for (Task t : loaded) {
-            if (tasks.size() >= maxSize) {
-                break;
-            }
-            tasks.add(t);
-        }
     }
 }
