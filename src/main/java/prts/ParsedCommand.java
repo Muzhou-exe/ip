@@ -4,10 +4,6 @@ import java.time.LocalDate;
 
 /**
  * Represents a parsed user command.
- * <p>
- * A ParsedCommand contains the command type and any associated arguments
- * extracted from the user's raw input.
- * </p>
  */
 public class ParsedCommand {
 
@@ -15,25 +11,16 @@ public class ParsedCommand {
         TODO, DEADLINE, EVENT,
         DELETE, MARK, UNMARK,
         LIST, FIND, BYE, CHEER,
+        UNDO,
         ERROR
     }
 
     final Type type;
-
-    // Common fields
     final String description;
-
-    // Deadline fields
     final LocalDate byDate;
-
-    // Event fields
     final String from;
     final String to;
-
-    // Index fields (1-based)
     final int index;
-
-    // Error
     final String errorMessage;
 
     private ParsedCommand(Type type, String description, LocalDate byDate,
@@ -59,16 +46,20 @@ public class ParsedCommand {
         return new ParsedCommand(Type.LIST, null, null, null, null, -1, null);
     }
 
-    static ParsedCommand todo(String desc) {
-        return new ParsedCommand(Type.TODO, desc, null, null, null, -1, null);
+    static ParsedCommand undo() {
+        return new ParsedCommand(Type.UNDO, null, null, null, null, -1, null);
     }
 
-    static ParsedCommand deadline(String desc, LocalDate byDate) {
-        return new ParsedCommand(Type.DEADLINE, desc, byDate, null, null, -1, null);
+    static ParsedCommand todo(String description) {
+        return new ParsedCommand(Type.TODO, description, null, null, null, -1, null);
     }
 
-    static ParsedCommand event(String desc, String from, String to) {
-        return new ParsedCommand(Type.EVENT, desc, null, from, to, -1, null);
+    static ParsedCommand deadline(String description, LocalDate byDate) {
+        return new ParsedCommand(Type.DEADLINE, description, byDate, null, null, -1, null);
+    }
+
+    static ParsedCommand event(String description, String from, String to) {
+        return new ParsedCommand(Type.EVENT, description, null, from, to, -1, null);
     }
 
     static ParsedCommand delete(int index) {
@@ -87,7 +78,7 @@ public class ParsedCommand {
         return new ParsedCommand(Type.FIND, keyword, null, null, null, -1, null);
     }
 
-    static ParsedCommand error(String msg) {
-        return new ParsedCommand(Type.ERROR, null, null, null, null, -1, msg);
+    static ParsedCommand error(String message) {
+        return new ParsedCommand(Type.ERROR, null, null, null, null, -1, message);
     }
 }

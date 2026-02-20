@@ -1,6 +1,7 @@
 package prts;
 
 import java.util.List;
+
 import prts.task.Task;
 
 /**
@@ -17,12 +18,15 @@ public class Ui {
     }
 
     public String getListString(TaskList tasks) {
-        if (tasks.size() == 0) return "The task list is currently empty.";
-        StringBuilder sb = new StringBuilder("Here are the tasks in your list:\n");
-        for (int i = 1; i <= tasks.size(); i++) {
-            sb.append(i).append(".").append(tasks.get(i)).append("\n");
+        if (tasks.size() == 0) {
+            return "The task list is currently empty.";
         }
-        return sb.toString();
+
+        StringBuilder builder = new StringBuilder("Here are the tasks in your list:\n");
+        for (int i = 1; i <= tasks.size(); i++) {
+            builder.append(i).append(".").append(tasks.get(i)).append("\n");
+        }
+        return builder.toString();
     }
 
     public String getAddedString(Task task, int taskCount) {
@@ -44,19 +48,30 @@ public class Ui {
     }
 
     public String getFindResultString(List<Task> matches) {
-        if (matches.isEmpty()) return "No matching tasks found.";
-        StringBuilder sb = new StringBuilder("Here are the matching tasks in your list:\n");
-        for (int i = 0; i < matches.size(); i++) {
-            sb.append(i + 1).append(".").append(matches.get(i)).append("\n");
+        if (matches.isEmpty()) {
+            return "No matching tasks found.";
         }
-        return sb.toString();
+
+        StringBuilder builder = new StringBuilder("Here are the matching tasks in your list:\n");
+        for (int i = 0; i < matches.size(); i++) {
+            builder.append(i + 1).append(".").append(matches.get(i)).append("\n");
+        }
+        return builder.toString();
     }
 
-    public String getErrorString(String msg) {
-        return "Error: " + msg;
+    public String getUndoString() {
+        return "Done! I have undone the most recent change.";
     }
 
-    public String getCheerString(String msg) {
-        return msg;
+    public String getNothingToUndoString() {
+        return "Nothing to undo.";
+    }
+
+    public String getErrorString(String message) {
+        return "Error: " + message;
+    }
+
+    public String getCheerString(String message) {
+        return message;
     }
 }

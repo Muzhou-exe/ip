@@ -16,9 +16,6 @@ import prts.task.Todo;
 
 /**
  * Handles loading and saving task data to disk.
- * <p>
- * This class manages file I/O operations for persistent storage.
- * </p>
  */
 public class Storage {
 
@@ -28,116 +25,131 @@ public class Storage {
         this.filePath = filePath;
     }
 
-    /**
-     * Loads tasks from the data file.
-     *
-     * @return A list of tasks loaded from disk.
-     * @throws IOException If reading from the file fails.
-     */
     public List<Task> load() throws IOException {
-        try {
-            ensureDataFileExists();
-
-            List<String> lines = Files.readAllLines(Paths.get(filePath));
-            ArrayList<Task> result = new ArrayList<>();
-
-            for (String line : lines) {
-                if (line.trim().isEmpty()) {
-                    continue;
-                }
-                Task t = parseTask(line);
-                if (t != null) {
-                    result.add(t);
-                }
-            }
-            return result;
-        } catch (IOException e) {
-            throw e;
-        }
+        ensureDataFileExists();
+        List<String> lines = Files.readAllLines(Paths.get(filePath));
+        return parseTaskLines(lines);
     }
 
     public void save(TaskList taskList) {
         try {
             ensureDataFileExists();
+
             List<String> lines = new ArrayList<>();
-            for (Task t : taskList.toList()) {
-                lines.add(t.toStorageString());
+            for (Task task : taskList.toList()) {
+                lines.add(task.toStorageString());
             }
+
             Files.write(Paths.get(filePath), lines);
         } catch (IOException e) {
             System.out.println("OOPS!!! Error saving tasks: " + e.getMessage());
         }
     }
 
-    private void ensureDataFileExists() throws IOException {
-        Path p = Paths.get(filePath);
-        if (!Files.exists(p)) {
-            if (p.getParent() != null) {
-                Files.createDirectories(p.getParent());
-            }
-            Files.createFile(p);
-        }
-    }
-
-    private Task parseTask(String line) {
-        // Expected format: TYPE | DONE | DESC | [EXTRA]
-        String[] parts = line.split("\\s*\\|\\s*");
-        if (parts.length < 3) {
-            return null;
-        }
-
-        String type = parts[0];
-        boolean done = "1".equals(parts[1]);
-        String desc = parts[2];
-
-        Task t = null; // Initialize to null
-
-        // Fixed switch-case indentation
-        switch (type) {
-            case "T":
-                t = new Todo(desc);
-                break;
-            case "D":
-                if (parts.length < 4) return null;
-                String byPart = parts[3].trim();
-                try {
-                    LocalDate d = LocalDate.parse(byPart);
-                    t = new Deadline(desc, d);
-                } catch (DateTimeParseException e) {
-                    t = new Deadline(desc, byPart); // backward compatible
-                }
-                break;
-            case "E":
-                if (parts.length < 5) return null;
-                t = new Event(desc, parts[3].trim(), parts[4].trim());
-                break;
-            default:
-                return null;
-        }
-
-        if (t != null && done) {
-            t.markDone();
-        }
-        return t;
-    }
-
-    public java.util.List<String> loadCheers() {
-        java.util.List<String> lines = new java.util.ArrayList<>();
+    public List<String> loadCheers() {
+        List<String> lines = new ArrayList<>();
         try {
-            Path p = Paths.get("data/cheer.txt");
-            if (!Files.exists(p)) {
-                Files.createDirectories(p.getParent());
-                Files.writeString(p, "Keep going!\n");
+            Path path = Paths.get("data/cheer.txt");
+
+            if (!Files.exists(path)) {
+                Files.createDirectories(path.getParent());
+                Files.writeString(path, "Keep going!\n");
             }
-            for (String line : Files.readAllLines(p)) {
-                String s = line.trim();
-                if (!s.isEmpty()) {
-                    lines.add(s);
+
+            for (String line : Files.readAllLines(path)) {
+                String trimmed = line.trim();
+                if (!trimmed.isEmpty()) {
+                    lines.add(trimmed);
                 }
             }
         } catch (IOException e) {
             lines.add("You can do it!");
         }
         return lines;
+    }
+
+    /**
+     * Parses multiple storage lines into tasks.
+     */
+    public List<Task> parseTaskLines(List<String> lines) {
+        List<Task> tasks = new ArrayList<>();
+
+        for (String line : lines) {
+            if (line == null || line.trim().isEmpty()) {
+                continue;
+            }
+
+            Task task = parseTaskLine(line);
+            if (task != null) {
+                tasks.add(task);
+            }
+        }
+        return tasks;
+    }
+
+    /**
+     * Parses a single storage line into a task.
+     */
+    public Task parseTaskLine(String line) {
+        String[] parts = line.split("\\s*\\|\\s*");
+
+        if (parts.length < 3) {
+            return null;
+        }
+
+        String type = parts[0].trim();
+        boolean isDone = "1".equals(parts[1].trim());
+        String description = parts[2].trim();
+
+        Task task;
+
+        switch (type) {
+            case "T":
+                task = new Todo(description);
+                break;
+
+            case "D":
+                if (parts.length < 4) {
+                    return null;
+                }
+                task = parseDeadline(description, parts[3].trim());
+                break;
+
+            case "E":
+                if (parts.length < 5) {
+                    return null;
+                }
+                task = new Event(description, parts[3].trim(), parts[4].trim());
+                break;
+
+            default:
+                return null;
+        }
+
+        if (isDone) {
+            task.markDone();
+        }
+
+        return task;
+    }
+
+    private Task parseDeadline(String description, String byPart) {
+        try {
+            LocalDate date = LocalDate.parse(byPart);
+            return new Deadline(description, date);
+        } catch (DateTimeParseException e) {
+            return new Deadline(description, byPart);
+        }
+    }
+
+    private void ensureDataFileExists() throws IOException {
+        Path path = Paths.get(filePath);
+
+        if (!Files.exists(path)) {
+            if (path.getParent() != null) {
+                Files.createDirectories(path.getParent());
+            }
+            Files.createFile(path);
+        }
     }
 }

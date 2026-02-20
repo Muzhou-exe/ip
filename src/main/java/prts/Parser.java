@@ -5,149 +5,143 @@ import java.time.format.DateTimeParseException;
 
 /**
  * Parses raw user input into executable commands.
- * <p>
- * This class is responsible for validating user input and converting it
- * into {@link ParsedCommand} objects.
- * </p>
  */
 public class Parser {
 
     public static ParsedCommand parse(String input) {
+        String trimmed = input.trim();
 
-        // bye / list
-        if (input.equals("bye")) {
+        if (trimmed.equals("bye")) {
             return ParsedCommand.bye();
         }
-        if (input.equals("cheer")) {
+        if (trimmed.equals("cheer")) {
             return ParsedCommand.cheer();
         }
-        if (input.equals("list")) {
+        if (trimmed.equals("list")) {
             return ParsedCommand.list();
         }
-        // find
-        if (input.equals("find")) {
+        if (trimmed.equals("undo")) {
+            return ParsedCommand.undo();
+        }
+
+        if (trimmed.equals("find")) {
             return ParsedCommand.error("OOPS!!! Usage: find <keyword>");
         }
-        if (input.startsWith("find ")) {
-            String keyword = input.substring(5).trim();
+        if (trimmed.startsWith("find ")) {
+            String keyword = trimmed.substring(5).trim();
             if (keyword.isEmpty()) {
                 return ParsedCommand.error("OOPS!!! Usage: find <keyword>");
             }
             return ParsedCommand.find(keyword);
         }
 
-        // delete
-        if (input.equals("delete")) {
+        if (trimmed.equals("delete")) {
             return ParsedCommand.error("OOPS!!! Please provide a task number. Usage: delete <index>");
         }
-        if (input.startsWith("delete ")) {
-            Integer idx = parseIndex(input.substring(7));
-            if (idx == null) {
+        if (trimmed.startsWith("delete ")) {
+            Integer index = parseIndex(trimmed.substring(7));
+            if (index == null) {
                 return ParsedCommand.error("OOPS!!! Please provide a valid task number.");
             }
-            if (idx < 1) {
+            if (index < 1) {
                 return ParsedCommand.error("OOPS!!! That task number is out of range.");
             }
-            return ParsedCommand.delete(idx);
+            return ParsedCommand.delete(index);
         }
 
-        // mark / unmark
-        if (input.equals("mark")) {
+        if (trimmed.equals("mark")) {
             return ParsedCommand.error("OOPS!!! Please provide a task number. Usage: mark <index>");
         }
-        if (input.startsWith("mark ")) {
-            Integer idx = parseIndex(input.substring(5));
-            if (idx == null) {
+        if (trimmed.startsWith("mark ")) {
+            Integer index = parseIndex(trimmed.substring(5));
+            if (index == null) {
                 return ParsedCommand.error("OOPS!!! Please provide a valid task number.");
             }
-            if (idx < 1) {
+            if (index < 1) {
                 return ParsedCommand.error("OOPS!!! That task number is out of range.");
             }
-            return ParsedCommand.mark(idx);
+            return ParsedCommand.mark(index);
         }
 
-        if (input.equals("unmark")) {
+        if (trimmed.equals("unmark")) {
             return ParsedCommand.error("OOPS!!! Please provide a task number. Usage: unmark <index>");
         }
-        if (input.startsWith("unmark ")) {
-            Integer idx = parseIndex(input.substring(7));
-            if (idx == null) {
+        if (trimmed.startsWith("unmark ")) {
+            Integer index = parseIndex(trimmed.substring(7));
+            if (index == null) {
                 return ParsedCommand.error("OOPS!!! Please provide a valid task number.");
             }
-            if (idx < 1) {
+            if (index < 1) {
                 return ParsedCommand.error("OOPS!!! That task number is out of range.");
             }
-            return ParsedCommand.unmark(idx);
+            return ParsedCommand.unmark(index);
         }
 
-        // Task creation
-        if (input.equals("todo")) {
+        if (trimmed.equals("todo")) {
             return ParsedCommand.error("OOPS!!! The description of a todo cannot be empty.");
         }
-        if (input.startsWith("todo ")) {
-            String desc = input.substring(5).trim();
-            if (desc.isEmpty()) {
+        if (trimmed.startsWith("todo ")) {
+            String description = trimmed.substring(5).trim();
+            if (description.isEmpty()) {
                 return ParsedCommand.error("OOPS!!! The description of a todo cannot be empty.");
             }
-            return ParsedCommand.todo(desc);
+            return ParsedCommand.todo(description);
         }
 
-        if (input.equals("deadline")) {
+        if (trimmed.equals("deadline")) {
             return ParsedCommand.error("OOPS!!! Usage: deadline <desc> /by <date>");
         }
-        if (input.startsWith("deadline ")) {
-            String body = input.substring(9).trim();
-            int byIdx = body.indexOf("/by");
-            if (byIdx == -1) {
+        if (trimmed.startsWith("deadline ")) {
+            String body = trimmed.substring(9).trim();
+            int byIndex = body.indexOf("/by");
+            if (byIndex == -1) {
                 return ParsedCommand.error("OOPS!!! Usage: deadline <desc> /by <date>");
             }
-            String desc = body.substring(0, byIdx).trim();
-            String byStr = body.substring(byIdx + 3).trim();
-            if (desc.isEmpty() || byStr.isEmpty()) {
+
+            String description = body.substring(0, byIndex).trim();
+            String byString = body.substring(byIndex + 3).trim();
+            if (description.isEmpty() || byString.isEmpty()) {
                 return ParsedCommand.error("OOPS!!! Description and deadline cannot be empty.");
             }
 
             try {
-                LocalDate d = LocalDate.parse(byStr);
-                return ParsedCommand.deadline(desc, d);
+                LocalDate date = LocalDate.parse(byString);
+                return ParsedCommand.deadline(description, date);
             } catch (DateTimeParseException e) {
-                // Fallback or error?
-                // Spec says we can accept yyyy-mm-dd. Let's force it or fail.
                 return ParsedCommand.error("OOPS!!! Invalid date format. Please use yyyy-mm-dd.");
             }
         }
 
-        if (input.equals("event")) {
+        if (trimmed.equals("event")) {
             return ParsedCommand.error("OOPS!!! Usage: event <desc> /from <start> /to <end>");
         }
-        if (input.startsWith("event ")) {
-            String body = input.substring(6).trim();
-            int fromIdx = body.indexOf("/from");
-            int toIdx = body.indexOf("/to");
-            if (fromIdx == -1 || toIdx == -1) {
+        if (trimmed.startsWith("event ")) {
+            String body = trimmed.substring(6).trim();
+            int fromIndex = body.indexOf("/from");
+            int toIndex = body.indexOf("/to");
+            if (fromIndex == -1 || toIndex == -1) {
                 return ParsedCommand.error("OOPS!!! Usage: event <desc> /from <start> /to <end>");
             }
-            if (fromIdx > toIdx) {
+            if (fromIndex > toIndex) {
                 return ParsedCommand.error("OOPS!!! /from must come before /to");
             }
 
-            String desc = body.substring(0, fromIdx).trim();
-            String from = body.substring(fromIdx + 5, toIdx).trim();
-            String to = body.substring(toIdx + 3).trim();
+            String description = body.substring(0, fromIndex).trim();
+            String from = body.substring(fromIndex + 5, toIndex).trim();
+            String to = body.substring(toIndex + 3).trim();
 
-            if (desc.isEmpty() || from.isEmpty() || to.isEmpty()) {
+            if (description.isEmpty() || from.isEmpty() || to.isEmpty()) {
                 return ParsedCommand.error("OOPS!!! All event fields cannot be empty.");
             }
-            return ParsedCommand.event(desc, from, to);
+            return ParsedCommand.event(description, from, to);
         }
 
-        // unknown
         return ParsedCommand.error("OOPS!!! I'm sorry, but I don't know what that means :-(");
     }
 
-    private static Integer parseIndex(String s) {
+    private static Integer parseIndex(String text) {
         try {
-            return Integer.parseInt(s.trim());
+            return Integer.parseInt(text.trim());
         } catch (NumberFormatException e) {
             return null;
         }
