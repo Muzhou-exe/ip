@@ -5,131 +5,84 @@ import java.util.List;
 
 import prts.task.Task;
 
-/**
- * Represents a list of tasks managed by the chatbot.
- * Task numbers used by this class are 1-based.
- */
 public class TaskList {
 
-    private final int maxSize;
+    private final int MAX_SIZE;
     private final ArrayList<Task> tasks = new ArrayList<>();
 
-    /**
-     * Constructs a TaskList with a maximum size.
-     *
-     * @param maxSize Maximum number of tasks allowed.
-     */
     public TaskList(int maxSize) {
-        assert maxSize > 0 : "maxSize should be positive";
-        this.maxSize = maxSize;
+        assert maxSize > 0 : "Max size must be positive";
+        this.MAX_SIZE = maxSize;
     }
 
-    /**
-     * Returns the number of tasks in the list.
-     *
-     * @return Number of tasks.
-     */
     public int size() {
         return tasks.size();
     }
 
-    /**
-     * Returns the task at the given 1-based task number.
-     *
-     * @param oneBasedIndex Task number shown to the user (1-based).
-     * @return The task at the specified task number.
-     */
     public Task get(int oneBasedIndex) {
-        assert oneBasedIndex >= 1 : "Task index is 1-based and should be >= 1";
+        int i = oneBasedIndex - 1;
 
-        int zeroBasedIndex = oneBasedIndex - 1;
-        assert zeroBasedIndex >= 0 : "Converted index should not be negative";
+        assert oneBasedIndex > 0 : "Index should be positive";
 
-        if (zeroBasedIndex < 0 || zeroBasedIndex >= tasks.size()) {
-            throw new IllegalArgumentException("OOPS!!! That task number is out of range.");
+        if (i < 0 || i >= tasks.size()) {
+            throw new IllegalArgumentException(
+                    "OOPS!!! That task number is out of range.");
         }
-        return tasks.get(zeroBasedIndex);
+
+        return tasks.get(i);
     }
 
-    /**
-     * Adds a task to the list.
-     *
-     * @param task Task to add.
-     */
-    public void addTask(Task task) {
-        assert task != null : "Task to add should not be null";
+    public void addTask(Task t) {
+        assert t != null : "Task should not be null";
 
-        if (tasks.size() >= maxSize) {
-            throw new IllegalStateException("OOPS!!! Your task list is full (max " + maxSize + " tasks).");
+        if (tasks.size() >= MAX_SIZE) {
+            throw new IllegalStateException(
+                    "OOPS!!! Your task list is full (max "
+                            + MAX_SIZE + " tasks).");
         }
-        tasks.add(task);
+
+        tasks.add(t);
     }
 
-    /**
-     * Deletes and returns the task at the given 1-based task number.
-     *
-     * @param oneBasedIndex Task number shown to the user (1-based).
-     * @return The removed task.
-     */
     public Task delete(int oneBasedIndex) {
-        Task task = get(oneBasedIndex);
-        tasks.remove(oneBasedIndex - 1);
-        return task;
+        int i = oneBasedIndex - 1;
+
+        assert oneBasedIndex > 0 : "Index should be positive";
+
+        if (i < 0 || i >= tasks.size()) {
+            throw new IllegalArgumentException(
+                    "OOPS!!! That task number is out of range.");
+        }
+
+        return tasks.remove(i);
     }
 
-    /**
-     * Marks a task as done.
-     *
-     * @param oneBasedIndex Task number shown to the user (1-based).
-     * @return The updated task.
-     */
     public Task mark(int oneBasedIndex) {
-        Task task = get(oneBasedIndex);
-        task.markDone();
-        return task;
+        Task t = get(oneBasedIndex);
+        t.markDone();
+        return t;
     }
 
-    /**
-     * Marks a task as not done.
-     *
-     * @param oneBasedIndex Task number shown to the user (1-based).
-     * @return The updated task.
-     */
     public Task unmark(int oneBasedIndex) {
-        Task task = get(oneBasedIndex);
-        task.unmarkDone();
-        return task;
+        Task t = get(oneBasedIndex);
+        t.unmarkDone();
+        return t;
     }
 
-    /**
-     * Finds tasks containing the keyword.
-     *
-     * @param keyword Keyword to search.
-     * @return Matching tasks.
-     */
     public List<Task> find(String keyword) {
         assert keyword != null : "Keyword should not be null";
 
-        String trimmedKeyword = keyword.trim();
-        if (trimmedKeyword.isEmpty()) {
-            return List.of();
-        }
-
         List<Task> matches = new ArrayList<>();
-        for (Task task : tasks) {
-            assert task != null : "Task list should not contain null tasks";
-            if (task.toString().contains(trimmedKeyword)) {
-                matches.add(task);
+
+        for (Task t : tasks) {
+            if (t.toString().contains(keyword)) {
+                matches.add(t);
             }
         }
+
         return matches;
     }
 
-    /**
-     * Returns a snapshot list of tasks.
-     *
-     * @return Copy of tasks.
-     */
     public List<Task> toList() {
         return new ArrayList<>(tasks);
     }
