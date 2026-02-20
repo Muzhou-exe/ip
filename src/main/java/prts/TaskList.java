@@ -14,10 +14,11 @@ import prts.task.Task;
  */
 public class TaskList {
 
-    private final int MAX_SIZE; // Coding standard: CONSTANT_CASE
-    private final ArrayList<Task> tasks = new ArrayList<>(); // Initialize at declaration
+    private final int MAX_SIZE;
+    private final ArrayList<Task> tasks = new ArrayList<>();
 
     public TaskList(int maxSize) {
+        assert maxSize > 0 : "Max size must be positive";
         this.MAX_SIZE = maxSize;
     }
 
@@ -25,16 +26,10 @@ public class TaskList {
         return tasks.size();
     }
 
-    /**
-     * Returns the task at the given 1-based task number.
-     *
-     * @param oneBasedIndex Task number shown to the user (1-based).
-     * @return The task at the specified task number.
-     * @throws IllegalArgumentException If the task number is out of range.
-     */
-    public Task get(int oneBasedIndex) throws IllegalArgumentException {
+    public Task get(int oneBasedIndex) {
+        assert oneBasedIndex > 0 : "Index should be positive";
+
         int i = oneBasedIndex - 1;
-        assert i >= 0 : "Index should not be negative";
 
         if (i < 0 || i >= tasks.size()) {
             throw new IllegalArgumentException("OOPS!!! That task number is out of range.");
@@ -42,28 +37,19 @@ public class TaskList {
         return tasks.get(i);
     }
 
-    /**
-     * Adds a task to the list.
-     *
-     * @param t The task to add.
-     * @throws IllegalStateException If the task list is full.
-     */
     public void addTask(Task t) {
+        assert t != null : "Task should not be null";
+
         if (tasks.size() >= MAX_SIZE) {
-            // Defensive coding: Throw exception instead of silent failure/break
-            throw new IllegalStateException("OOPS!!! Your task list is full (max " + MAX_SIZE + " tasks).");
+            throw new IllegalStateException(
+                    "OOPS!!! Your task list is full (max " + MAX_SIZE + " tasks).");
         }
         tasks.add(t);
     }
 
-    /**
-     * Deletes and returns the task at the given 1-based task number.
-     *
-     * @param oneBasedIndex The 1-based index of the task.
-     * @return The removed task.
-     * @throws IllegalArgumentException If the task number is out of range.
-     */
     public Task delete(int oneBasedIndex) {
+        assert oneBasedIndex > 0 : "Index should be positive";
+
         int i = oneBasedIndex - 1;
         if (i < 0 || i >= tasks.size()) {
             throw new IllegalArgumentException("OOPS!!! That task number is out of range.");
@@ -72,7 +58,7 @@ public class TaskList {
     }
 
     public Task mark(int oneBasedIndex) {
-        Task t = get(oneBasedIndex); // utilize get() which handles bounds check
+        Task t = get(oneBasedIndex);
         t.markDone();
         return t;
     }
@@ -84,6 +70,8 @@ public class TaskList {
     }
 
     public List<Task> find(String keyword) {
+        assert keyword != null : "Keyword should not be null";
+
         List<Task> matches = new ArrayList<>();
         for (Task t : tasks) {
             if (t.toString().contains(keyword)) {

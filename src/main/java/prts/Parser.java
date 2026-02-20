@@ -14,6 +14,8 @@ public class Parser {
 
     public static ParsedCommand parse(String input) {
 
+        assert input != null : "Input should not be null";
+
         // bye / list
         if (input.equals("bye")) {
             return ParsedCommand.bye();
@@ -24,6 +26,7 @@ public class Parser {
         if (input.equals("list")) {
             return ParsedCommand.list();
         }
+
         // find
         if (input.equals("find")) {
             return ParsedCommand.error("OOPS!!! Usage: find <keyword>");
@@ -111,8 +114,6 @@ public class Parser {
                 LocalDate d = LocalDate.parse(byStr);
                 return ParsedCommand.deadline(desc, d);
             } catch (DateTimeParseException e) {
-                // Fallback or error?
-                // Spec says we can accept yyyy-mm-dd. Let's force it or fail.
                 return ParsedCommand.error("OOPS!!! Invalid date format. Please use yyyy-mm-dd.");
             }
         }
