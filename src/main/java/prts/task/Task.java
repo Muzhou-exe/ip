@@ -5,7 +5,6 @@ package prts.task;
  * This is an abstract class that cannot be instantiated directly.
  */
 public abstract class Task {
-
     protected final String description;
     private boolean isDone;
 
@@ -15,11 +14,8 @@ public abstract class Task {
      * @param description The description of the task.
      */
     public Task(String description) {
-        assert description != null : "Description should not be null";
-        assert !description.trim().isEmpty() : "Description should not be empty";
-
         this.description = description;
-        this.isDone = false;
+        this.isDone = false; // Explicit initialization
     }
 
     /**
