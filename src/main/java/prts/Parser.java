@@ -13,7 +13,7 @@ import java.time.format.DateTimeParseException;
 public class Parser {
 
     public static ParsedCommand parse(String input) {
-
+        assert input != null : "Input should not be null";
         // bye / list
         if (input.equals("bye")) {
             return ParsedCommand.bye();
