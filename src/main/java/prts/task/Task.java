@@ -22,22 +22,42 @@ public abstract class Task {
         this.isDone = false;
     }
 
+    /**
+     * Marks the task as done.
+     */
     public void markDone() {
         isDone = true;
     }
 
+    /**
+     * Marks the task as not done.
+     */
     public void unmarkDone() {
         isDone = false;
     }
 
+    /**
+     * Returns true if the task is done, false otherwise.
+     *
+     * @return The completion status of the task.
+     */
     public boolean isDone() {
         return isDone;
     }
 
+    /**
+     * Returns the status icon (X for done, space for not done).
+     * Private helper method for toString.
+     */
     private String getStatusIcon() {
         return "[" + (isDone ? "X" : " ") + "]";
     }
 
+    /**
+     * Returns the string representation of the task for storage.
+     *
+     * @return The formatted string for file storage.
+     */
     public abstract String toStorageString();
 
     @Override
