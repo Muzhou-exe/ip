@@ -2,6 +2,7 @@ package prts;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import prts.task.Task;
 
@@ -72,13 +73,9 @@ public class TaskList {
     public List<Task> find(String keyword) {
         assert keyword != null : "Keyword should not be null";
 
-        List<Task> matches = new ArrayList<>();
-        for (Task t : tasks) {
-            if (t.toString().contains(keyword)) {
-                matches.add(t);
-            }
-        }
-        return matches;
+        return tasks.stream()
+                .filter(t -> t.toString().contains(keyword))
+                .collect(Collectors.toList());
     }
 
     public List<Task> toList() {
