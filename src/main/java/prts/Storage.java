@@ -16,9 +16,6 @@ import prts.task.Todo;
 
 /**
  * Handles loading and saving task data to disk.
- * <p>
- * This class manages file I/O operations for persistent storage.
- * </p>
  */
 public class Storage {
 
@@ -32,21 +29,8 @@ public class Storage {
 
     public List<Task> load() throws IOException {
         ensureDataFileExists();
-
         List<String> lines = Files.readAllLines(Paths.get(filePath));
-        List<Task> result = new ArrayList<>();
-
-        for (String line : lines) {
-            if (line == null || line.trim().isEmpty()) {
-                continue;
-            }
-            Task task = parseTaskLine(line);
-            if (task != null) {
-                result.add(task);
-            }
-        }
-
-        return result;
+        return parseTaskLines(lines);
     }
 
     public void save(TaskList taskList) {
@@ -64,19 +48,35 @@ public class Storage {
         }
     }
 
-    private void ensureDataFileExists() throws IOException {
-        Path path = Paths.get(filePath);
+    /**
+     * Parses multiple storage lines into tasks.
+     *
+     * @param lines Raw storage lines.
+     * @return Parsed tasks.
+     */
+    public List<Task> parseTaskLines(List<String> lines) {
+        List<Task> result = new ArrayList<>();
 
-        if (!Files.exists(path)) {
-            if (path.getParent() != null) {
-                Files.createDirectories(path.getParent());
+        for (String line : lines) {
+            if (line == null || line.trim().isEmpty()) {
+                continue;
             }
-            Files.createFile(path);
+            Task task = parseTaskLine(line);
+            if (task != null) {
+                result.add(task);
+            }
         }
+
+        return result;
     }
 
-    private Task parseTaskLine(String line) {
-        // Expected format: TYPE | DONE | DESC | [EXTRA]
+    /**
+     * Parses a single storage line into a task.
+     *
+     * @param line Raw storage line.
+     * @return Task, or null if malformed.
+     */
+    public Task parseTaskLine(String line) {
         String[] parts = line.split("\\s*\\|\\s*");
         if (parts.length < 3) {
             return null;
@@ -130,6 +130,17 @@ public class Storage {
             return null;
         }
         return new Event(desc, parts[3].trim(), parts[4].trim());
+    }
+
+    private void ensureDataFileExists() throws IOException {
+        Path path = Paths.get(filePath);
+
+        if (!Files.exists(path)) {
+            if (path.getParent() != null) {
+                Files.createDirectories(path.getParent());
+            }
+            Files.createFile(path);
+        }
     }
 
     public List<String> loadCheers() {

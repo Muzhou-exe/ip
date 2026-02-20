@@ -5,10 +5,6 @@ import java.time.format.DateTimeParseException;
 
 /**
  * Parses raw user input into executable commands.
- * <p>
- * This class is responsible for validating user input and converting it
- * into {@link ParsedCommand} objects.
- * </p>
  */
 public class Parser {
 
@@ -16,7 +12,7 @@ public class Parser {
 
         assert input != null : "Input should not be null";
 
-        // bye / list
+        // simple commands
         if (input.equals("bye")) {
             return ParsedCommand.bye();
         }
@@ -25,6 +21,9 @@ public class Parser {
         }
         if (input.equals("list")) {
             return ParsedCommand.list();
+        }
+        if (input.equals("undo")) {
+            return ParsedCommand.undo();
         }
 
         // find
@@ -142,7 +141,6 @@ public class Parser {
             return ParsedCommand.event(desc, from, to);
         }
 
-        // unknown
         return ParsedCommand.error("OOPS!!! I'm sorry, but I don't know what that means :-(");
     }
 

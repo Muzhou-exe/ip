@@ -81,4 +81,18 @@ public class TaskList {
     public List<Task> toList() {
         return new ArrayList<>(tasks);
     }
+
+    /**
+     * Replaces the current task list contents with the given tasks.
+     *
+     * @param newTasks Tasks to replace with.
+     */
+    public void resetTo(List<Task> newTasks) {
+        assert newTasks != null : "New task list should not be null";
+
+        tasks.clear();
+        for (Task t : newTasks) {
+            addTask(t);
+        }
+    }
 }
