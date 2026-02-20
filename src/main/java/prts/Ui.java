@@ -1,6 +1,7 @@
 package prts;
 
 import java.util.List;
+
 import prts.task.Task;
 
 /**
@@ -58,5 +59,13 @@ public class Ui {
 
     public String getCheerString(String msg) {
         return msg;
+    }
+
+    public String getUndoSuccessString() {
+        return "Done. I have undone the previous action.";
+    }
+
+    public String getNothingToUndoString() {
+        return "Nothing to undo.";
     }
 }

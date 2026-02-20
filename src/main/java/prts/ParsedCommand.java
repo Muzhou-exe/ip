@@ -4,36 +4,23 @@ import java.time.LocalDate;
 
 /**
  * Represents a parsed user command.
- * <p>
- * A ParsedCommand contains the command type and any associated arguments
- * extracted from the user's raw input.
- * </p>
  */
 public class ParsedCommand {
 
     enum Type {
         TODO, DEADLINE, EVENT,
         DELETE, MARK, UNMARK,
-        LIST, FIND, BYE, CHEER,
+        LIST, FIND, UNDO, BYE, CHEER,
         ERROR
     }
 
     final Type type;
 
-    // Common fields
     final String description;
-
-    // Deadline fields
     final LocalDate byDate;
-
-    // Event fields
     final String from;
     final String to;
-
-    // Index fields (1-based)
     final int index;
-
-    // Error
     final String errorMessage;
 
     private ParsedCommand(Type type, String description, LocalDate byDate,
@@ -57,6 +44,10 @@ public class ParsedCommand {
 
     static ParsedCommand list() {
         return new ParsedCommand(Type.LIST, null, null, null, null, -1, null);
+    }
+
+    static ParsedCommand undo() {
+        return new ParsedCommand(Type.UNDO, null, null, null, null, -1, null);
     }
 
     static ParsedCommand todo(String desc) {
